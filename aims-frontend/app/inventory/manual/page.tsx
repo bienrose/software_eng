@@ -23,10 +23,6 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// ---------------------------------------------------------------------------
-// Data — swap for your API / DB results in production.
-// ---------------------------------------------------------------------------
-
 type NavItem = { href: string; label: string; icon: typeof Home };
 
 const navItems: NavItem[] = [
@@ -71,13 +67,11 @@ const user = { name: "John Doe", role: "Administrator" };
 export default function ManualInventoryPage() {
   const [rows, setRows] = useState<InventoryRow[]>(initialRows);
 
-  // Form state
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
 
-  // Search state (not wired to filter yet — swap for real query later)
   const [searchItem, setSearchItem] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
 
@@ -112,7 +106,6 @@ export default function ManualInventoryPage() {
   return (
     <main className={`${poppins.className} min-h-screen bg-[#f5f8f6] text-[#145c32]`}>
       <div className="flex min-h-screen">
-        {/* SIDEBAR — uses classes from dashboard.css */}
         <aside className="sidebar">
           <div className="sidebar-brand">
             <Image
@@ -157,9 +150,7 @@ export default function ManualInventoryPage() {
           </div>
         </aside>
 
-        {/* MAIN */}
         <section className="main">
-          {/* TOP BAR */}
           <header className="topbar">
             <div>
               <h1 className="topbar-title">Manual Inventory Input</h1>
@@ -177,10 +168,8 @@ export default function ManualInventoryPage() {
             </button>
           </header>
 
-          {/* CONTENT */}
           <div className="page-content">
             <div className="page-inner stack-6">
-              {/* ADD NEW ITEM */}
               <form onSubmit={handleAddItem} className="panel panel-pad">
                 <h2 className="panel-title">Add new item</h2>
 
@@ -247,7 +236,6 @@ export default function ManualInventoryPage() {
                 </button>
               </form>
 
-              {/* SEARCH BAR */}
               <div className="panel panel-pad">
                 <h2 className="panel-title">Inventory List</h2>
 
@@ -273,7 +261,6 @@ export default function ManualInventoryPage() {
                 </div>
               </div>
 
-              {/* TABLE */}
               <div className="panel">
                 <div className="table-wrap">
                   <table className="data-table">

@@ -12,7 +12,6 @@ const poppins = Poppins({
 export default function ForgotPasswordPage() {
   return (
     <main className={`${poppins.className} auth-page`}>
-      {/* TOP NAVIGATION */}
       <header className="auth-navbar">
         <div className="flex items-center gap-2.5">
           <Image
@@ -37,10 +36,8 @@ export default function ForgotPasswordPage() {
         </nav>
       </header>
 
-      {/* MAIN CONTENT */}
       <div className="auth-content">
         <section className="auth-section">
-          {/* AIMS BRANDING */}
           <div className="mb-1 text-center">
             <Image
               src={logo}
@@ -52,7 +49,6 @@ export default function ForgotPasswordPage() {
             <h1 className="auth-title mt-2">AIMS</h1>
           </div>
 
-          {/* HEADER */}
           <div className="mb-5 text-center">
             <h2 className="auth-heading">Forgot your password?</h2>
             <p className="auth-description">
@@ -60,7 +56,6 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
 
-          {/* EMAIL */}
           <form>
             <div className="mb-5">
               <label htmlFor="email" className="auth-label">
@@ -74,20 +69,17 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            {/* RESET BUTTON */}
             <button type="submit" className="auth-button">
               Send reset instructions
             </button>
           </form>
 
-          {/* DIVIDER */}
           <div className="auth-divider">
             <div className="auth-divider-line" />
             <span className="auth-divider-text">or</span>
             <div className="auth-divider-line" />
           </div>
 
-          {/* LOGIN */}
           <div className="rounded-md bg-[#e8f5e9] px-4 py-3 text-center shadow-[0_4px_12px_rgba(20,92,50,0.08)]">
             <p className="auth-bottom-text">
               Remember your password?{" "}

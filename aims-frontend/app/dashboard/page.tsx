@@ -22,10 +22,6 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// ---------------------------------------------------------------------------
-// Page data — swap for your API / DB results in production.
-// ---------------------------------------------------------------------------
-
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
@@ -83,8 +79,6 @@ const summaryStats = [
 
 const user = { name: "John Doe", role: "Administrator", initials: "JD" };
 
-// ---------------------------------------------------------------------------
-
 export default function DashboardPage() {
   const [today, setToday] = useState<string | null>(null);
 
@@ -101,7 +95,6 @@ export default function DashboardPage() {
   return (
     <main className={`${poppins.className} app-shell`}>
       <div className="app-body">
-        {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-brand">
             <Image
@@ -146,9 +139,7 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        {/* MAIN */}
         <section className="main">
-          {/* TOP BAR */}
           <header className="topbar">
             <div>
               <h1 className="topbar-title">Dashboard</h1>
@@ -159,10 +150,8 @@ export default function DashboardPage() {
             </button>
           </header>
 
-          {/* CONTENT */}
           <div className="page-content">
             <div className="page-inner">
-              {/* SUMMARY */}
               <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {summaryStats.map((stat) => (
                   <div key={stat.label} className="card p-4">
@@ -178,7 +167,6 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              {/* QUICK ACTIONS */}
               <div className="mb-8">
                 <h2 className="section-title">Quick actions</h2>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -203,7 +191,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* RECENT INVENTORY */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="section-title mb-0">Recent inventory</h2>

@@ -22,10 +22,6 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// ---------------------------------------------------------------------------
-// Data — swap for your API / DB results in production.
-// ---------------------------------------------------------------------------
-
 type NavItem = { href: string; label: string; icon: typeof Home };
 
 const navItems: NavItem[] = [
@@ -66,7 +62,6 @@ export default function InventoryPage() {
   return (
     <main className={`${poppins.className} min-h-screen bg-[#f5f8f6] text-[#145c32]`}>
       <div className="flex min-h-screen">
-        {/* SIDEBAR — uses classes from dashboard.css */}
         <aside className="sidebar">
           <div className="sidebar-brand">
             <Image
@@ -111,9 +106,7 @@ export default function InventoryPage() {
           </div>
         </aside>
 
-        {/* MAIN */}
         <section className="flex min-w-0 flex-1 flex-col">
-          {/* TOP BAR */}
           <header
             className={`flex h-[64px] items-center justify-between border-b border-[#b8d2bd] bg-white px-6 lg:px-8 ${surfaceShadow}`}
           >
@@ -131,10 +124,8 @@ export default function InventoryPage() {
             </button>
           </header>
 
-          {/* CONTENT */}
           <div className="flex-1 px-6 py-10 lg:px-10">
             <div className="mx-auto w-full max-w-[960px]">
-              {/* HEADER BLOCK — centered */}
               <div className="mb-8 flex flex-col items-center text-center">
                 <h2 className="mt-8 text-[24px] font-bold tracking-tight text-[#145c32] lg:text-[28px]">
                   Choose what type of inventory creation
@@ -144,7 +135,6 @@ export default function InventoryPage() {
                 </p>
               </div>
 
-              {/* OPTION CARDS */}
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 {options.map((option) => {
                   const Icon = option.icon;
