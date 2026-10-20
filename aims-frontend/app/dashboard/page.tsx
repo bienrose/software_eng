@@ -25,7 +25,7 @@ const poppins = Poppins({
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
-  { href: "/inventory-creator", label: "Inventory Creator", icon: Sparkles },
+  { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Prediction", icon: TrendingUp },
 ];
 
@@ -57,7 +57,7 @@ const quickActions = [
     description: "Record a new item entering the warehouse.",
   },
   {
-    href: "/inventory-creator",
+    href: "/inventory_creator",
     icon: Sparkles,
     title: "Inventory creator",
     description: "Generate a category structure from a brief.",

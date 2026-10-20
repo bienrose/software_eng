@@ -28,25 +28,35 @@
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg);
   color: var(--green-dark);
 }
 
 .app-body {
   display: flex;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .main {
   display: flex;
   flex-direction: column;
   flex: 1;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .sidebar {
   display: none;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   width: 230px;
   flex-shrink: 0;
   flex-direction: column;
@@ -62,6 +72,7 @@
 
 .sidebar-brand {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
@@ -76,8 +87,27 @@
 }
 
 .sidebar-nav {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   padding: 1.5rem 0.75rem;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  scrollbar-width: thin;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
 }
 
 .sidebar-link {
@@ -105,8 +135,20 @@
 }
 
 .sidebar-footer {
+  flex: 0 0 auto;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1rem;
+}
+
+@media (max-height: 520px) and (min-width: 1024px) {
+  .sidebar {
+    overflow-y: auto;
+  }
+
+  .sidebar-nav {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
 }
 
 .sidebar-user {
@@ -170,6 +212,7 @@
 
 .topbar {
   display: flex;
+  flex: 0 0 64px;
   align-items: center;
   justify-content: space-between;
   height: 64px;

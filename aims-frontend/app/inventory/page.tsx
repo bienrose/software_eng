@@ -3,176 +3,86 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
+import { ArrowRight, Bell, Boxes, CircleAlert, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import logo from "./logo.png";
 import "../styles/dashboard.css";
-import {
-  Home,
-  Boxes,
-  Sparkles,
-  TrendingUp,
-  Bell,
-  LogOut,
-  PenLine,
-  Wand2,
-  ArrowRight,
-} from "lucide-react";
+import styles from "./collections.module.css";
+import { useCallback, useEffect, useState } from "react";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-type NavItem = { href: string; label: string; icon: typeof Home };
-
-const navItems: NavItem[] = [
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
+const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
-  { href: "/inventory-creator", label: "Inventory Creator", icon: Sparkles },
+  { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Prediction", icon: TrendingUp },
 ];
 
-const user = { name: "John Doe", role: "Administrator" };
-
-const card =
-  "rounded-2xl border border-[#b8d2bd] bg-white shadow-[0_4px_12px_rgba(20,92,50,0.08),0_1px_3px_rgba(20,92,50,0.06)]";
-
-const surfaceShadow =
-  "shadow-[0_1px_3px_rgba(20,92,50,0.08),0_1px_2px_rgba(20,92,50,0.04)]";
-
-const options = [
-  {
-    href: "/inventory/manual",
-    icon: PenLine,
-    title: "Manual Input",
-    description:
-      "Type in item names, categories, and quantities one by one. Best when you already know exactly what you're adding.",
-    cta: "Start manual input",
-  },
-  {
-    href: "/inventory-creator",
-    icon: Wand2,
-    title: "Inventory Creator",
-    description:
-      "Describe what you need in plain language and let the platform draft a full category structure for you.",
-    cta: "Open inventory creator",
-  },
-];
+type InventorySummary = {
+  id: string;
+  name: string;
+  description: string | null;
+  itemCount: number;
+  totalUnits: number;
+  fieldCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+};
 
 export default function InventoryPage() {
+  const [inventories, setInventories] = useState<InventorySummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadInventories = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/inventories", { cache: "no-store" });
+      const result = await response.json() as { inventories?: InventorySummary[]; error?: string };
+      if (!response.ok) throw new Error(result.error || "Could not load inventories.");
+      setInventories(result.inventories ?? []);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Could not load inventories.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void loadInventories(); }, [loadInventories]);
+  const totalItems = inventories.reduce((sum, inventory) => sum + inventory.itemCount, 0);
+
   return (
-    <main className={`${poppins.className} min-h-screen bg-[#f5f8f6] text-[#145c32]`}>
-      <div className="flex min-h-screen">
+    <main className={`${poppins.className} app-shell`}>
+      <div className="app-body">
         <aside className="sidebar">
-          <div className="sidebar-brand">
-            <Image
-              src={logo}
-              alt="AIMS logo"
-              width={48}
-              height={48}
-              className="object-contain"
-            />
-            <p className="sidebar-brand-name">AIMS</p>
-          </div>
-
-          <nav className="sidebar-nav">
-            {navItems.map((item) => {
-              const active = item.href === "/inventory";
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`sidebar-link${active ? " is-active" : ""}`}
-                >
-                  <Icon size={16} strokeWidth={1.75} />
-                  {item.label}
-                </Link>
-              );
-            })}
+          <div className="sidebar-brand"><Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div>
+          <nav className="sidebar-nav" aria-label="Main navigation">
+            {navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
-
-          <div className="sidebar-footer">
-            <div className="sidebar-user">
-              <div className="sidebar-avatar">JD</div>
-              <div className="min-w-0">
-                <p className="sidebar-user-name">{user.name}</p>
-                <p className="sidebar-user-role">{user.role}</p>
-              </div>
-            </div>
-            <button className="sidebar-logout">
-              <LogOut size={14} strokeWidth={1.75} />
-              Log out
-            </button>
-          </div>
+          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
         </aside>
 
-        <section className="flex min-w-0 flex-1 flex-col">
-          <header
-            className={`flex h-[64px] items-center justify-between border-b border-[#b8d2bd] bg-white px-6 lg:px-8 ${surfaceShadow}`}
-          >
-            <div>
-              <h1 className="text-[17px] font-bold tracking-tight">Inventory</h1>
-              <p className="mt-0.5 text-[11px] text-[#718675]">
-                Choose how you want to add items
-              </p>
-            </div>
-            <button
-              className="flex h-9 w-9 items-center justify-center rounded-sm border border-[#b8d2bd] text-[#718675] transition-colors hover:bg-[#e8f5e9] hover:text-[#145c32]"
-              title="Notifications"
-            >
-              <Bell size={16} strokeWidth={1.75} />
-            </button>
-          </header>
+        <section className="main">
+          <header className="topbar"><div><h1 className="topbar-title">Inventory</h1><p className="topbar-subtitle">Choose an inventory to view its stock and activity</p></div><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button></header>
+          <div className="page-content">
+            <div className={`${styles.content} page-inner`}>
+              <div className={styles.intro}><div><p className={styles.eyebrow}>Inventory workspace</p><h2>Your inventories</h2><p>Open an inventory to review its items, stock levels, and recent movements.</p></div><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={15} />Create inventory</Link></div>
 
-          <div className="flex-1 px-6 py-10 lg:px-10">
-            <div className="mx-auto w-full max-w-[960px]">
-              <div className="mb-8 flex flex-col items-center text-center">
-                <h2 className="mt-8 text-[24px] font-bold tracking-tight text-[#145c32] lg:text-[28px]">
-                  Choose what type of inventory creation
-                </h2>
-                <p className="mt-2 max-w-[560px] text-[13px] leading-relaxed text-[#718675]">
-                  Pick how you want to build out your inventory.
-                </p>
-              </div>
+              <div className={styles.summary}><Boxes size={17} /><span><strong>{inventories.length}</strong> inventories</span><i /><Package size={17} /><span><strong>{totalItems}</strong> tracked items</span></div>
 
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                {options.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <div
-                      key={option.href}
-                      className={`${card} group flex flex-col items-center p-6 text-center transition-colors hover:border-[#145c32]`}
-                    >
-                      <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8f5e9] text-[#145c32]">
-                        <Icon size={22} strokeWidth={1.75} />
-                      </div>
+              <section className={styles.grid} aria-label="Available inventories">
+                {loading && <div className={styles.stateCard}>Loading inventories from aims_db…</div>}
+                {!loading && error && <div className={`${styles.stateCard} ${styles.errorState}`} role="alert"><CircleAlert size={18} /><span>{error}</span><button type="button" onClick={() => void loadInventories()}><RefreshCw size={13} />Try again</button></div>}
+                {!loading && !error && inventories.map((inventory, index) => <Link href={`/inventory/${inventory.id}`} className={styles.card} key={inventory.id}>
+                  <div className={styles.cardTop}><span className={`${styles.cardIcon} ${styles[`tone${index % 3}`]}`}><Boxes size={19} /></span><span className={styles.openIcon}><ArrowRight size={16} /></span></div>
+                  <h3>{inventory.name}</h3><p className={styles.description}>{inventory.description || "Inventory records and adaptive item fields."}</p>
+                  <div className={styles.cardMeta}><span><Package size={13} />{inventory.itemCount} {inventory.itemCount === 1 ? "item" : "items"}</span><span>{inventory.fieldCount} adaptive {inventory.fieldCount === 1 ? "field" : "fields"}</span></div>
+                  <div className={styles.cardFooter}><span>{inventory.totalUnits.toLocaleString()} total units</span><span>Open inventory <ArrowRight size={13} /></span></div>
+                </Link>)}
+              </section>
 
-                      <h3 className="text-[18px] font-bold text-[#145c32]">
-                        {option.title}
-                      </h3>
-                      <p className="mt-2 text-[13px] leading-relaxed text-[#718675]">
-                        {option.description}
-                      </p>
-
-                      <Link
-                        href={option.href}
-                        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#145c32] px-5 py-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#0f4d29]"
-                      >
-                        {option.cta}
-                        <ArrowRight
-                          size={14}
-                          strokeWidth={2}
-                          className="transition-transform group-hover:translate-x-0.5"
-                        />
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <p className="mt-8 text-center text-[11px] text-[#718675]">
-                Not sure? The inventory creator is faster if you already have a rough list.
-              </p>
+              {!loading && !error && inventories.length === 0 && <div className={styles.emptyCard}><Boxes size={24} /><h3>No inventories yet</h3><p>Create an inventory to see it listed here.</p><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={14} />Create your first inventory</Link></div>}
+              <p className={styles.demoNote}>Inventory records load from the MySQL database configured for this app.</p>
             </div>
           </div>
         </section>

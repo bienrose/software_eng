@@ -1,0 +1,23 @@
+.content { max-width:980px; margin:0 auto; padding-bottom:24px; }
+.backLink { display:inline-flex; align-items:center; gap:6px; margin:0 0 13px; color:var(--green-dark); font-size:10px; font-weight:600; text-decoration:none; }
+.backLink:hover { text-decoration:underline; }
+.notice,.error { display:flex; align-items:center; gap:8px; margin-bottom:12px; padding:11px 13px; border:1px solid var(--blue-border); border-radius:8px; background:var(--blue-bg); color:var(--blue); font-size:11px; }
+.error { border-color:var(--red-border); background:var(--red-bg); color:var(--red); }
+.error button { margin-left:auto; padding:5px 9px; border:1px solid var(--red-border); border-radius:5px; background:#fff; color:var(--red); font:inherit; cursor:pointer; }
+.formCard { padding:22px; border:1px solid var(--green-border); border-radius:12px; background:#fff; box-shadow:var(--shadow-card); }
+.heading { display:flex; gap:12px; padding-bottom:17px; border-bottom:1px solid #e8eee8; }
+.icon { display:flex; flex:0 0 40px; width:40px; height:40px; align-items:center; justify-content:center; border-radius:10px; background:var(--green-light); color:var(--green-dark); }
+.heading h2 { margin:0; color:var(--green-dark); font-size:17px; }
+.heading p { margin:5px 0 0; color:var(--green-muted); font-size:10px; }
+.fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:18px 0; }
+.fields label { display:grid; align-content:start; gap:6px; color:var(--green-dark); font-size:10px; font-weight:600; }
+.fields label span { color:var(--red); }
+.fields input,.fields textarea,.fields select { width:100%; min-height:38px; padding:8px 10px; border:1px solid var(--green-border); border-radius:6px; outline:none; background:#fff; color:var(--green-dark); font:inherit; font-size:11px; font-weight:400; }
+.fields textarea { resize:vertical; }
+.fields input:focus,.fields textarea:focus,.fields select:focus { border-color:var(--green-dark); box-shadow:0 0 0 3px rgba(20,92,50,.08); }
+.fields label:nth-child(3) { grid-column:1/-1; }
+.actions { display:flex; justify-content:flex-end; gap:8px; padding-top:14px; border-top:1px solid #e8eee8; }
+.actions a,.actions button { display:inline-flex; min-height:38px; align-items:center; justify-content:center; gap:7px; padding:0 14px; border:1px solid var(--green-border); border-radius:6px; background:#fff; color:var(--green-dark); font:inherit; font-size:10px; font-weight:600; text-decoration:none; cursor:pointer; }
+.actions button { border-color:var(--green-dark); background:var(--green-dark); color:#fff; }
+.actions button:disabled { opacity:.6; cursor:wait; }
+@media(max-width:600px) { .formCard { padding:16px 14px; } .fields { grid-template-columns:1fr; } .fields label:nth-child(3) { grid-column:auto; } }
