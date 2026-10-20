@@ -67,11 +67,14 @@ export default function MovementForm({ kind }: { kind: MovementKind }) {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const selectedInventoryId = params.get("inventoryId") ?? "";
-    setInventoryId(selectedInventoryId);
-    setItemId(params.get("itemId") ?? "");
-    fetchItems(selectedInventoryId).catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : "Could not load inventory items.")).finally(() => setLoading(false));
+    const timeout = window.setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      const selectedInventoryId = params.get("inventoryId") ?? "";
+      setInventoryId(selectedInventoryId);
+      setItemId(params.get("itemId") ?? "");
+      fetchItems(selectedInventoryId).catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : "Could not load inventory items.")).finally(() => setLoading(false));
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, [fetchItems]);
 
   const inventory = inventoryId ? items.find((item) => item.inventoryId === inventoryId) : undefined;

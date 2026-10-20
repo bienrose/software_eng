@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ArrowRight, Bell, Boxes, ClipboardList, Home, LogOut, Sparkles, TrendingUp, WandSparkles } from "lucide-react";
+import { ArrowRight, Boxes, ClipboardList, Home, LogOut, Sparkles, TrendingUp, WandSparkles } from "lucide-react";
 import logo from "../inventory/logo.png";
 import "../styles/dashboard.css";
 import styles from "./inventory-creator.module.css";

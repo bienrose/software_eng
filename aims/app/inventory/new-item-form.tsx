@@ -59,7 +59,10 @@ export default function NewInventoryItemForm({ inventoryId }: { inventoryId: str
     }
   }, [inventoryId]);
 
-  useEffect(() => { void loadInventory(); }, [loadInventory]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => { void loadInventory(); }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [loadInventory]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

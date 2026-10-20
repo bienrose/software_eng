@@ -48,7 +48,10 @@ export default function InventoryPage() {
     }
   }, []);
 
-  useEffect(() => { void loadInventories(); }, [loadInventories]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => { void loadInventories(); }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [loadInventories]);
   const totalItems = inventories.reduce((sum, inventory) => sum + inventory.itemCount, 0);
 
   return (

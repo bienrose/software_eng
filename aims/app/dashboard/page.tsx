@@ -14,7 +14,6 @@ import {
   Bell,
   LogOut,
   Plus,
-  ArrowUpRight,
 } from "lucide-react";
 
 const poppins = Poppins({
@@ -83,13 +82,14 @@ export default function DashboardPage() {
   const [today, setToday] = useState<string | null>(null);
 
   useEffect(() => {
-    setToday(
+    const timeout = window.setTimeout(() => setToday(
       new Date().toLocaleDateString(undefined, {
         weekday: "long",
         month: "long",
         day: "numeric",
       })
-    );
+    ), 0);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   return (

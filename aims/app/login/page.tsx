@@ -103,7 +103,7 @@ export default function LoginPage() {
 
           <div className="auth-bottom-text">
             <p>
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a href="/register" className="auth-link">
                 Create an account
               </a>

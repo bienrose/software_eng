@@ -6,7 +6,7 @@ import { validateSchemaValue } from "@/lib/schema-value";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type FieldInput = { label?: unknown; dataType?: unknown; required?: unknown };
+type FieldInput = { label?: unknown; dataType?: unknown; required?: unknown; options?: unknown };
 type ItemInput = {
   name?: unknown;
   itemCode?: unknown;
@@ -86,20 +86,47 @@ export async function POST(request: Request) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name || name.length > 120) return Response.json({ error: "Inventory name is required (up to 120 characters)." }, { status: 400 });
   const method = body.generationMethod === "nlp" || body.generationMethod === "llm" ? body.generationMethod : "manual";
+  if (body.fields !== undefined && !Array.isArray(body.fields)) return Response.json({ error: "Fields must be sent as a list." }, { status: 400 });
+  if (body.items !== undefined && !Array.isArray(body.items)) return Response.json({ error: "Items must be sent as a list." }, { status: 400 });
   const fields = Array.isArray(body.fields) ? body.fields as FieldInput[] : [];
   const items = Array.isArray(body.items) ? body.items as ItemInput[] : [];
   if (items.length > 1000) return Response.json({ error: "A single inventory can include at most 1,000 items." }, { status: 400 });
 
-  const normalizedFields: Array<{ key: string; label: string; dataType: string; required: boolean }> = [];
+  const normalizedFields: Array<{ key: string; label: string; dataType: string; required: boolean; options: string[] }> = [];
   const usedKeys = new Set<string>();
   const usedLabels = new Set<string>();
-  for (const field of fields) {
+  for (const [index, field] of fields.entries()) {
+    if (!field || typeof field !== "object" || Array.isArray(field)) {
+      return Response.json({ error: `Field ${index + 1} must be an object.` }, { status: 400 });
+    }
     const label = typeof field.label === "string" ? field.label.trim() : "";
-    if (!label || label.length > 120) continue;
+    if (!label) return Response.json({ error: `Field ${index + 1} needs a name.` }, { status: 400 });
+    if (label.length > 120) return Response.json({ error: `Field "${label.slice(0, 30)}…" is longer than 120 characters.` }, { status: 400 });
     const normalizedLabel = label.toLocaleLowerCase();
     if (usedLabels.has(normalizedLabel)) return Response.json({ error: `The field name "${label}" is duplicated.` }, { status: 400 });
     usedLabels.add(normalizedLabel);
-    const dataType = typeof field.dataType === "string" && validTypes.has(field.dataType) ? field.dataType : "text";
+    if (typeof field.dataType !== "string" || !validTypes.has(field.dataType)) {
+      return Response.json({ error: `Field "${label}" has an unsupported data type.` }, { status: 400 });
+    }
+    if (field.required !== undefined && typeof field.required !== "boolean") {
+      return Response.json({ error: `Required setting for "${label}" must be true or false.` }, { status: 400 });
+    }
+    const dataType = field.dataType;
+    if (field.options !== undefined && !Array.isArray(field.options)) {
+      return Response.json({ error: `Choices for "${label}" must be sent as a list.` }, { status: 400 });
+    }
+    const options = Array.isArray(field.options) ? field.options as unknown[] : [];
+    if (options.length > 100) return Response.json({ error: `Field "${label}" can have up to 100 choices.` }, { status: 400 });
+    if (options.some((option) => typeof option !== "string" || !option.trim() || option.trim().length > 500)) {
+      return Response.json({ error: `Each choice for "${label}" must contain 1 to 500 characters.` }, { status: 400 });
+    }
+    const normalizedOptions = options.map((option) => (option as string).trim());
+    if (new Set(normalizedOptions.map((option) => option.toLocaleLowerCase())).size !== normalizedOptions.length) {
+      return Response.json({ error: `Choices for "${label}" must be unique.` }, { status: 400 });
+    }
+    if (dataType !== "enum" && normalizedOptions.length > 0) {
+      return Response.json({ error: `Only choice-list fields can have choices.` }, { status: 400 });
+    }
     const baseKey = fieldKey(label);
     let key = baseKey;
     let suffix = 2;
@@ -108,7 +135,32 @@ export async function POST(request: Request) {
       key = `${baseKey.slice(0, 63 - ending.length)}${ending}`;
     }
     usedKeys.add(key);
-    normalizedFields.push({ key, label, dataType, required: Boolean(field.required) });
+    normalizedFields.push({ key, label, dataType, required: Boolean(field.required), options: normalizedOptions });
+  }
+
+  for (const [index, item] of items.entries()) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      return Response.json({ error: `Item ${index + 1} must be an object.` }, { status: 400 });
+    }
+    const itemName = typeof item.name === "string" ? item.name.trim() : "";
+    const unit = typeof item.unit === "string" ? item.unit.trim() : "";
+    if (!itemName) return Response.json({ error: `Item ${index + 1} needs a name.` }, { status: 400 });
+    if (itemName.length > 180) return Response.json({ error: `The name for item ${index + 1} can be up to 180 characters.` }, { status: 400 });
+    if (!unit) return Response.json({ error: `Item ${index + 1} needs a unit.` }, { status: 400 });
+    if (unit.length > 40) return Response.json({ error: `The unit for item ${index + 1} can be up to 40 characters.` }, { status: 400 });
+    const quantity = Number(item.quantity ?? 0);
+    const reorderLevel = Number(item.reorderLevel ?? 0);
+    if (!Number.isFinite(quantity) || quantity < 0 || !Number.isFinite(reorderLevel) || reorderLevel < 0) {
+      return Response.json({ error: `Quantity and reorder level for item ${index + 1} must be non-negative numbers.` }, { status: 400 });
+    }
+    if (quantity > 99999999999.999 || reorderLevel > 99999999999.999 ||
+        Math.abs(quantity * 1000 - Math.round(quantity * 1000)) > 1e-7 ||
+        Math.abs(reorderLevel * 1000 - Math.round(reorderLevel * 1000)) > 1e-7) {
+      return Response.json({ error: `Quantity and reorder level for item ${index + 1} must fit 11 whole digits and 3 decimal places.` }, { status: 400 });
+    }
+    if (item.customAttributes !== undefined && (!item.customAttributes || typeof item.customAttributes !== "object" || Array.isArray(item.customAttributes))) {
+      return Response.json({ error: `Custom field values for item ${index + 1} must be an object.` }, { status: 400 });
+    }
   }
 
   const inventoryId = randomUUID();
@@ -119,12 +171,22 @@ export async function POST(request: Request) {
   const description = typeof body.description === "string" ? body.description.trim().slice(0, 5000) : null;
   const sourcePrompt = typeof body.sourcePrompt === "string" ? body.sourcePrompt.trim().slice(0, 10000) : null;
   const providedLabels = readAttributes(body.displayLabels);
-  const defaultLabels = { name: "Item name", category: "Category", quantity: "Quantity", unit: "Unit", reorderLevel: "Reorder level", status: "Status", updated: "Last update" };
+  const defaultLabels = { name: "Item name", code: "Item code", description: "Description", category: "Category", quantity: "Quantity", unit: "Unit", reorderLevel: "Reorder level", status: "Status", updated: "Last update" };
   const coreLabelKeys = Object.keys(defaultLabels) as Array<keyof typeof defaultLabels>;
-  const displayLabels = Object.fromEntries(coreLabelKeys.map((key) => {
+  const displayLabels: Record<string, unknown> = Object.fromEntries(coreLabelKeys.map((key) => {
     const value = providedLabels[key];
     return [key, typeof value === "string" && value.trim() ? value.trim().slice(0, 120) : defaultLabels[key]];
   }));
+  const validColumnKeys = new Set<string>([
+    ...coreLabelKeys.filter((key) => key !== "category"),
+    ...normalizedFields.map((field) => `field:${field.label}`),
+  ]);
+  const defaultColumnOrder = ["name", "code", "description", "quantity", "unit", "reorderLevel", "status", "updated",
+    ...normalizedFields.map((field) => `field:${field.label}`)];
+  const requestedColumnOrder = Array.isArray(providedLabels.columnOrder)
+    ? providedLabels.columnOrder.filter((key): key is string => typeof key === "string" && validColumnKeys.has(key))
+    : defaultColumnOrder;
+  displayLabels.columnOrder = [...new Set(requestedColumnOrder)];
 
   try {
     await withConnection(async (connection) => {
@@ -141,8 +203,8 @@ export async function POST(request: Request) {
 
         for (const [index, field] of normalizedFields.entries()) {
           await connection.execute(
-            "INSERT INTO inventory_schema_fields (id, schema_version_id, field_key, label, data_type, is_required, display_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [randomUUID(), schemaId, field.key, field.label, field.dataType, field.required, index],
+            "INSERT INTO inventory_schema_fields (id, schema_version_id, field_key, label, data_type, is_required, options, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [randomUUID(), schemaId, field.key, field.label, field.dataType, field.required, JSON.stringify(field.options), index],
           );
         }
 
@@ -167,7 +229,7 @@ export async function POST(request: Request) {
               throw new Error(`Field "${field.label}" is required for every item.`);
             }
             if (supplied === undefined || supplied === "") continue;
-            const validated = validateSchemaValue(field.dataType, supplied);
+            const validated = validateSchemaValue(field.dataType, supplied, field.options);
             if (!validated.valid) throw new Error(`Field "${field.label}" has an invalid ${field.dataType} value.`);
             attributes[field.key] = validated.value;
           }

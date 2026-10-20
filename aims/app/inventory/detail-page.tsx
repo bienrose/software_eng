@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import {
   ArrowDownToLine, ArrowRight, ArrowUpFromLine, Bell, Boxes, CircleAlert,
-  Clock3, Home, LogOut, PackagePlus, Plus, RefreshCw, Search, Sparkles, TrendingUp,
+  Clock3, Home, LogOut, PackagePlus, RefreshCw, Search, Sparkles, TrendingUp, X,
 } from "lucide-react";
 import logo from "./logo.png";
 import "../styles/dashboard.css";
@@ -30,8 +30,16 @@ type Movement = {
   quantity: number; balanceAfter: number; reference: string | null; notes: string | null; occurredAt: string;
 };
 type InventoryDetail = {
-  inventory: { id: string; name: string; description: string | null; createdAt: string; schemaVersion: number; displayLabels: Record<string, string> };
+  inventory: { id: string; name: string; description: string | null; createdAt: string; schemaVersion: number; displayLabels: Record<string, unknown> };
   fields: InventoryField[]; items: InventoryItem[]; movements: Movement[];
+};
+type InventoryTableColumn = { key: string; label: string; field?: InventoryField };
+const EMPTY_ITEMS: InventoryItem[] = [];
+const EMPTY_MOVEMENTS: Movement[] = [];
+const EMPTY_FIELDS: InventoryField[] = [];
+const coreColumnDefaults: Record<string, string> = {
+  name: "Item name", code: "Item code", description: "Description", quantity: "Quantity", unit: "Unit",
+  reorderLevel: "Reorder level", status: "Status", updated: "Last update",
 };
 
 function formatDate(value: string) {
@@ -55,6 +63,7 @@ export default function InventoryDetailPage({ inventoryId }: { inventoryId: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [editMethodOpen, setEditMethodOpen] = useState(false);
 
   const loadInventory = useCallback(async () => {
     setLoading(true);
@@ -71,21 +80,59 @@ export default function InventoryDetailPage({ inventoryId }: { inventoryId: stri
     }
   }, [inventoryId]);
 
-  useEffect(() => { void loadInventory(); }, [loadInventory]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => { void loadInventory(); }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [loadInventory]);
 
-  const items = data?.items ?? [];
-  const movements = data?.movements ?? [];
+  const items = data?.items ?? EMPTY_ITEMS;
+  const movements = data?.movements ?? EMPTY_MOVEMENTS;
+  const schemaFields = data?.fields ?? EMPTY_FIELDS;
+  const tableColumns = useMemo<InventoryTableColumn[]>(() => {
+    const labels = data?.inventory.displayLabels ?? {};
+    const fallbackOrder = ["name", "code", "description", "quantity", "unit", "reorderLevel", "status", "updated",
+      ...schemaFields.map((field) => `field:${field.label}`)];
+    const storedOrder = labels.columnOrder;
+    const order = Array.isArray(storedOrder) ? storedOrder.filter((key): key is string => typeof key === "string") : fallbackOrder;
+    return order.flatMap((key) => {
+      if (key.startsWith("field:")) {
+        const field = schemaFields.find((entry) => entry.label === key.slice("field:".length));
+        return field ? [{ key, label: field.label, field }] : [];
+      }
+      if (!Object.hasOwn(coreColumnDefaults, key)) return [];
+      const label = labels[key];
+      return [{ key, label: typeof label === "string" && label ? label : coreColumnDefaults[key] }];
+    });
+  }, [data?.inventory.displayLabels, schemaFields]);
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return items;
     return items.filter((item) => item.name.toLowerCase().includes(query)
       || (item.code ?? "").toLowerCase().includes(query)
+        || (item.description ?? "").toLowerCase().includes(query)
       || Object.values(item.customAttributes).some((value) => String(value ?? "").toLowerCase().includes(query)));
   }, [items, search]);
   const totalUnits = items.reduce((sum, item) => sum + item.quantity, 0);
   const lowStockCount = items.filter((item) => item.quantity > 0 && item.quantity <= item.reorderLevel).length;
   const outOfStockCount = items.filter((item) => item.quantity <= 0).length;
-  const schemaFields = data?.fields ?? [];
+
+  function renderInventoryCell(column: InventoryTableColumn, item: InventoryItem) {
+    if (column.field) {
+      return <td key={column.key}><span className={styles.categoryText}>{String(item.customAttributes[column.field.key] ?? "—")}</span></td>;
+    }
+    if (column.key === "name") return <td key={column.key}><span className={styles.itemName}>{item.name}</span></td>;
+    if (column.key === "code") return <td key={column.key}><span className={styles.itemCode}>{item.code || "—"}</span></td>;
+    if (column.key === "description") return <td key={column.key}><span className={styles.categoryText}>{item.description || "—"}</span></td>;
+    if (column.key === "quantity") return <td key={column.key}><span className={styles.quantityValue}>{item.quantity.toLocaleString()}</span></td>;
+    if (column.key === "unit") return <td key={column.key}><span className={styles.quantityUnit}>{item.unit}</span></td>;
+    if (column.key === "reorderLevel") return <td key={column.key}><span className={styles.reorderValue}>{item.reorderLevel.toLocaleString()} {item.unit}</span></td>;
+    if (column.key === "status") {
+      const status = getStatus(item);
+      return <td key={column.key}><span className={`${styles.statusBadge} ${status.className}`}>{status.label}</span></td>;
+    }
+    if (column.key === "updated") return <td key={column.key}><span className={styles.updatedText}>{formatDate(item.updatedAt)}</span></td>;
+    return <td key={column.key}>—</td>;
+  }
 
   return (
     <main className={`${poppins.className} app-shell`}>
@@ -107,11 +154,21 @@ export default function InventoryDetailPage({ inventoryId }: { inventoryId: stri
               {loading && <div className={styles.loadingState}>Loading inventory from aims_db…</div>}
 
               {!loading && data && <>
+                {editMethodOpen && <div className={styles.editMethodOverlay} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditMethodOpen(false); }}>
+                  <section className={styles.editMethodDialog} role="dialog" aria-modal="true" aria-labelledby="edit-method-title">
+                    <button type="button" className={styles.editMethodClose} onClick={() => setEditMethodOpen(false)} aria-label="Close"><X size={17} /></button>
+                    <p className={styles.eyebrow}>Edit {data.inventory.name}</p><h2 id="edit-method-title">Choose an editing method</h2>
+                    <p>Choose how you want to update this inventory.</p>
+                    <div className={styles.editMethodChoices}>
+                      <Link href={`/inventory/${encodeURIComponent(inventoryId)}/edit/manual`}><PackagePlus size={18} /><span><strong>Manual</strong><small>Edit the inventory details and items in a table.</small></span><ArrowRight size={15} /></Link>
+                      <button type="button" disabled aria-disabled="true"><Sparkles size={18} /><span><strong>Automatic</strong><small>Automatic editing will be available later.</small></span><span className={styles.comingSoon}>Coming soon</span></button>
+                    </div>
+                  </section>
+                </div>}
                 <div className={styles.pageHeading}>
                   <div><p className={styles.eyebrow}>Inventory workspace · schema v{data.inventory.schemaVersion}</p><h2>{data.inventory.name}</h2><p className={styles.headingDescription}>{data.inventory.description || "Manage items and stock levels for this inventory."}</p></div>
                   <div className={styles.headingActions}>
-                    <Link href="/inventory_creator" className={styles.secondaryAction}><Sparkles size={14} />Create inventory</Link>
-                    <Link href={`/inventory/${inventoryId}/items/new`} className={styles.addItemLink}><Plus size={14} />Add item</Link>
+                    <button type="button" className={styles.secondaryAction} onClick={() => setEditMethodOpen(true)}><PackagePlus size={14} />Edit inventory</button>
                     <Link href={`/inventory/stock-in?inventoryId=${encodeURIComponent(inventoryId)}`} className={styles.stockInAction}><ArrowDownToLine size={15} />Stock in</Link>
                     <Link href={`/inventory/stock-out?inventoryId=${encodeURIComponent(inventoryId)}`} className={styles.stockOutAction}><ArrowUpFromLine size={15} />Stock out</Link>
                   </div>
@@ -128,19 +185,13 @@ export default function InventoryDetailPage({ inventoryId }: { inventoryId: stri
                   <div className={styles.panelHeading}><div><h3 id="inventory-items-title">Inventory items</h3><p>{filteredItems.length} items shown</p></div><button type="button" className={styles.addItemLink} onClick={() => void loadInventory()}><RefreshCw size={13} />Refresh</button></div>
                   <div className={styles.filterBar}><label className={styles.searchBox}><Search size={15} /><span className={styles.visuallyHidden}>Search items</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by item, code, or adaptive field" /></label></div>
                   <div className={styles.tableWrap}><table className={styles.inventoryTable}>
-                    <thead><tr><th>{data.inventory.displayLabels.name || "Item name"}</th><th>{data.inventory.displayLabels.quantity || "Quantity"}</th><th>{data.inventory.displayLabels.unit || "Unit"}</th><th>{data.inventory.displayLabels.reorderLevel || "Reorder level"}</th><th>{data.inventory.displayLabels.status || "Status"}</th>{schemaFields.map((field) => <th key={field.id}>{field.label}</th>)}<th>{data.inventory.displayLabels.updated || "Last update"}</th><th><span className={styles.visuallyHidden}>Actions</span></th></tr></thead>
+                    <thead><tr>{tableColumns.map((column) => <th key={column.key}>{column.label}</th>)}<th><span className={styles.visuallyHidden}>Actions</span></th></tr></thead>
                     <tbody>{filteredItems.length === 0
-                      ? <tr><td colSpan={7 + schemaFields.length} className={styles.emptyState}>{items.length ? "No items match your search." : "No items have been added to this inventory yet."}</td></tr>
-                      : filteredItems.map((item) => { const status = getStatus(item); return <tr key={item.id}>
-                        <td><span className={styles.itemName}>{item.name}</span><span className={styles.itemCode}>{item.code || "No item code"}</span></td>
-                        <td><span className={styles.quantityValue}>{item.quantity.toLocaleString()}</span></td>
-                        <td><span className={styles.quantityUnit}>{item.unit}</span></td>
-                        <td><span className={styles.reorderValue}>{item.reorderLevel.toLocaleString()} {item.unit}</span></td>
-                        <td><span className={`${styles.statusBadge} ${status.className}`}>{status.label}</span></td>
-                        {schemaFields.map((field) => <td key={field.id}><span className={styles.categoryText}>{String(item.customAttributes[field.key] ?? "—")}</span></td>)}
-                        <td><span className={styles.updatedText}>{formatDate(item.updatedAt)}</span></td>
+                      ? <tr><td colSpan={tableColumns.length + 1} className={styles.emptyState}>{items.length ? "No items match your search." : "No items have been added to this inventory yet."}</td></tr>
+                      : filteredItems.map((item) => <tr key={item.id}>
+                        {tableColumns.map((column) => renderInventoryCell(column, item))}
                         <td><div className={styles.rowActions}><Link href={`/inventory/stock-in?itemId=${encodeURIComponent(item.id)}&inventoryId=${encodeURIComponent(inventoryId)}`} className={styles.rowActionIn} aria-label={`Stock in ${item.name}`} title={`Stock in ${item.name}`}><ArrowDownToLine size={14} /></Link><Link href={`/inventory/stock-out?itemId=${encodeURIComponent(item.id)}&inventoryId=${encodeURIComponent(inventoryId)}`} className={styles.rowActionOut} aria-label={`Stock out ${item.name}`} title={`Stock out ${item.name}`}><ArrowUpFromLine size={14} /></Link></div></td>
-                      </tr>; })}
+                      </tr>)}
                     </tbody>
                   </table></div>
                 </section>
