@@ -1,4 +1,4 @@
-.content { max-width:980px; margin:0 auto; padding-bottom:24px; }
+.content { max-width:1280px; margin:0 auto; padding-bottom:24px; }
 .backLink { display:inline-flex; align-items:center; gap:6px; margin:0 0 13px; color:var(--green-dark); font-size:10px; font-weight:600; text-decoration:none; }
 .backLink:hover { text-decoration:underline; }
 .notice,.error { display:flex; align-items:center; gap:8px; margin-bottom:12px; padding:11px 13px; border:1px solid var(--blue-border); border-radius:8px; background:var(--blue-bg); color:var(--blue); font-size:11px; }
@@ -7,7 +7,7 @@
 .formCard { padding:22px; border:1px solid var(--green-border); border-radius:12px; background:#fff; box-shadow:var(--shadow-card); }
 .heading { display:flex; gap:12px; padding-bottom:17px; border-bottom:1px solid #e8eee8; }
 .icon { display:flex; flex:0 0 40px; width:40px; height:40px; align-items:center; justify-content:center; border-radius:10px; background:var(--green-light); color:var(--green-dark); }
-.heading h2 { margin:0; color:var(--green-dark); font-size:17px; }
+.heading h2 { margin:0; color:var(--green-dark); font-size:16px; }
 .heading p { margin:5px 0 0; color:var(--green-muted); font-size:10px; }
 .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:18px 0; }
 .fields label { display:grid; align-content:start; gap:6px; color:var(--green-dark); font-size:10px; font-weight:600; }

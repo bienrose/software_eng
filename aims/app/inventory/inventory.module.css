@@ -1,5 +1,5 @@
 .content {
-  max-width: 1180px;
+  max-width: 1280px;
 }
 
 .backLink {
@@ -632,7 +632,7 @@
   }
 
   .summaryCard strong {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .summaryFoot {

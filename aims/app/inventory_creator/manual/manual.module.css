@@ -80,3 +80,30 @@
 .srOnly { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 @media (max-width:680px) { .tableHeading { align-items:flex-start; flex-direction:column; } .tableTools { width:100%; justify-content:space-between; flex-wrap:wrap; } .tableFoot { align-items:flex-start; flex-direction:column; } }
 @media (max-width:440px) { .inventoryNameCard { padding:14px; } }
+
+/* Readable type and controls for the manual setup workspace. */
+.backLink { font-size:11px; }
+.inventoryNameField label { font-size:13px; }
+.inventoryNameField input { height:42px; font-size:13px; }
+.inventoryNameField small { font-size:12px; }
+.tableHeading h2 { font-size:20px; }
+.columnHint { font-size:13px; }
+.eyebrow { font-size:11px; }
+.rowCount { font-size:12px; }
+.addColumnForm input { width:170px; height:36px; font-size:12px; }
+.addColumnForm button, .discardButton { min-height:36px; height:36px; font-size:12px; }
+.sheet th { font-size:12px; }
+.sheet .headerInput { height:32px; font-size:12px; }
+.requiredColumnMark { font-size:10px; }
+.customFieldControls select, .choiceOptions { height:30px; font-size:12px; }
+.sheet .customFieldControls select, .sheet .choiceOptions { height:30px; }
+.sheet td { height:54px; }
+.sheet input, .sheet select { height:36px; font-size:13px; }
+.statusBadge { font-size:12px; }
+.dateCell { font-size:12px; }
+.emptyState strong { font-size:13px; }
+.emptyState span { font-size:12px; }
+.tableFoot { font-size:12px; }
+.addItemButton { min-height:36px; font-size:12px; }
+.saveError { font-size:12px; }
+.saveButton { min-height:42px; font-size:12px; }

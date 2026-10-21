@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import logo from "./logo.png";
-import "../styles/dashboard.css";
 import {
   Home,
   Boxes,
@@ -14,6 +12,14 @@ import {
   Bell,
   LogOut,
   Plus,
+  ArrowUpRight,
+  ArrowRight,
+  Search,
+  PackageCheck,
+  AlertTriangle,
+  Layers3,
+  Activity,
+  FileBarChart,
 } from "lucide-react";
 
 const poppins = Poppins({
@@ -24,8 +30,9 @@ const poppins = Poppins({
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 type Stock = "in-stock" | "low-stock" | "out-of-stock";
@@ -70,10 +77,10 @@ const quickActions = [
 ];
 
 const summaryStats = [
-  { label: "Total items", value: 248, accent: "text-[#145c32]" },
-  { label: "Low stock", value: 15, accent: "text-[#b8860b]" },
-  { label: "Out of stock", value: 4, accent: "text-[#a8322c]" },
-  { label: "Categories", value: 18, accent: "text-[#1e4f8a]" },
+  { label: "Total items", value: "248", note: "+12 this month", icon: Boxes, tone: "blue" },
+  { label: "Low stock", value: "15", note: "Needs attention", icon: AlertTriangle, tone: "amber" },
+  { label: "Out of stock", value: "4", note: "Across 3 categories", icon: PackageCheck, tone: "rose" },
+  { label: "Categories", value: "18", note: "Inventory groups", icon: Layers3, tone: "violet" },
 ];
 
 const user = { name: "John Doe", role: "Administrator", initials: "JD" };
@@ -93,12 +100,12 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <main className={`${poppins.className} app-shell`}>
+    <main className={`${poppins.className} app-shell dashboard-theme`}>
       <div className="app-body">
         <aside className="sidebar">
           <div className="sidebar-brand">
             <Image
-              src={logo}
+              src="/aims-logo.png"
               alt="AIMS logo"
               width={48}
               height={48}
@@ -143,68 +150,76 @@ export default function DashboardPage() {
           <header className="topbar">
             <div>
               <h1 className="topbar-title">Dashboard</h1>
-              <p className="topbar-subtitle">{today ?? "—"}</p>
+              <p className="topbar-subtitle">Overview of inventory levels, stock alerts, and recent activity.</p>
             </div>
-            <button className="topbar-icon-btn" title="Notifications">
-              <Bell size={16} strokeWidth={1.75} />
-            </button>
+            <div className="topbar-tools">
+              <span className="topbar-date">{today ?? "—"}</span>
+              <button className="topbar-icon-btn" title="Notifications" aria-label="Notifications">
+                <Bell size={17} strokeWidth={1.8} /><i />
+              </button>
+              <div className="topbar-profile">JD</div>
+            </div>
           </header>
 
           <div className="page-content">
-            <div className="page-inner">
-              <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="page-inner dashboard-inner">
+              <section className="welcome-panel">
+                <div className="welcome-copy">
+                  <span className="welcome-kicker"><Activity size={14} /> INVENTORY AT A GLANCE</span>
+                  <h2>Good to see you, {user.name.split(" ")[0]}.</h2>
+                  <p>Here’s what’s happening across your inventory today.</p>
+                </div>
+              </section>
+
+              <div className="stats-grid">
                 {summaryStats.map((stat) => (
-                  <div key={stat.label} className="card p-4">
-                    <p className="text-[11px] font-medium text-[#718675]">
-                      {stat.label}
-                    </p>
-                    <p
-                      className={`mt-1.5 text-[24px] font-bold leading-none ${stat.accent}`}
-                    >
-                      {stat.value}
-                    </p>
+                  <div key={stat.label} className={`stat-card stat-${stat.tone}`}>
+                    <div className="stat-top"><span>{stat.label}</span><span className="stat-icon"><stat.icon size={18} /></span></div>
+                    <p className="stat-value">{stat.value}</p>
+                    <p className="stat-note">{stat.note}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mb-8">
-                <h2 className="section-title">Quick actions</h2>
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+              <div className="dashboard-section">
+                <div className="section-heading"><div><span className="section-kicker">GET THINGS DONE</span><h2 className="section-title">Quick actions</h2></div><span className="section-hint">Shortcuts to your workspace</span></div>
+                <div className="actions-grid">
                   {quickActions.map((action) => {
                     const Icon = action.icon;
                     return (
                       <Link
                         key={action.href}
                         href={action.href}
-                        className="card group p-4 transition-colors hover:border-[#145c32] hover:bg-[#f0f7f1]"
+                        className="action-card group"
                       >
-                        <div className="mb-3 flex h-9 w-9 items-center justify-center bg-[#e8f5e9] text-[#145c32]">
+                        <div className="action-icon">
                           <Icon size={16} strokeWidth={1.75} />
                         </div>
-                        <p className="text-[12px] font-semibold">{action.title}</p>
-                        <p className="mt-1 text-[11px] text-[#718675]">
+                        <p className="action-title">{action.title}</p>
+                        <p className="action-description">
                           {action.description}
                         </p>
+                        <span className="action-arrow"><ArrowUpRight size={16} /></span>
                       </Link>
                     );
                   })}
                 </div>
               </div>
 
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <h2 className="section-title mb-0">Recent inventory</h2>
+              <div className="dashboard-section inventory-section">
+                <div className="section-heading"><div><span className="section-kicker">LATEST UPDATES</span><h2 className="section-title mb-0">Recent inventory</h2></div>
                   <Link
                     href="/inventory"
-                    className="text-[11px] font-medium text-[#718675] hover:text-[#145c32]"
+                    className="view-all-link"
                   >
-                    View all
+                    View all inventory <ArrowRight size={14} />
                   </Link>
                 </div>
 
-                <div className="card card-flush">
+                <div className="inventory-card">
+                  <div className="table-toolbar"><div className="table-heading"><span className="table-dot" /> Stock snapshot <span className="table-count">4 items</span></div><Link href="/inventory" className="table-search"><Search size={15} /> Browse inventory</Link></div>
                   <div className="overflow-x-auto">
-                    <table className="table min-w-[720px]">
+                    <table className="table dashboard-table min-w-[720px]">
                       <thead>
                         <tr>
                           <th>Item</th>

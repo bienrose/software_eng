@@ -5,17 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Poppins } from "next/font/google";
-import { ArrowLeft, Bell, Boxes, CircleAlert, Home, LogOut, PackagePlus, Save, Sparkles, TrendingUp } from "lucide-react";
-import logo from "./logo.png";
-import "../styles/dashboard.css";
+import { ArrowLeft, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, PackagePlus, Save, Sparkles, TrendingUp } from "lucide-react";
 import styles from "./new-item.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 type SchemaField = { id: string; key: string; label: string; dataType: string; required: boolean; options: unknown[] };
@@ -85,8 +84,8 @@ export default function NewInventoryItemForm({ inventoryId }: { inventoryId: str
     }
   }
 
-  return <main className={`${poppins.className} app-shell`}><div className="app-body">
-    <aside className="sidebar"><div className="sidebar-brand"><Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div><nav className="sidebar-nav" aria-label="Main navigation">{navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}</nav><div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div></aside>
+  return <main className={`${poppins.className} app-shell dashboard-theme`}><div className="app-body">
+    <aside className="sidebar"><div className="sidebar-brand"><Image src="/aims-logo.png" alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div><nav className="sidebar-nav" aria-label="Main navigation">{navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}</nav><div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div></aside>
     <section className="main"><header className="topbar"><div><h1 className="topbar-title">Add inventory item</h1><p className="topbar-subtitle">{inventory?.name ?? "Inventory"}</p></div><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button></header>
       <div className="page-content"><div className={`${styles.content} page-inner`}>
         <Link href={`/inventory/${encodeURIComponent(inventoryId)}`} className={styles.backLink}><ArrowLeft size={14} />Back to {inventory?.name ?? "inventory"}</Link>

@@ -6,10 +6,8 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import {
   ArrowDownToLine, ArrowLeft, ArrowUpFromLine, Bell, Boxes, CheckCircle2,
-  CircleAlert, Home, LogOut, Package, Sparkles, TrendingUp,
+  CircleAlert, FileBarChart, Home, LogOut, Package, Sparkles, TrendingUp,
 } from "lucide-react";
-import logo from "./logo.png";
-import "../styles/dashboard.css";
 import styles from "./movement.module.css";
 type MovementKind = "stock_in" | "stock_out";
 type InventoryItem = { id: string; inventoryId: string; inventoryName: string; code: string | null; name: string; unit: string; quantity: number; reorderLevel: number };
@@ -26,8 +24,9 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 export default function MovementForm({ kind }: { kind: MovementKind }) {
@@ -112,11 +111,11 @@ export default function MovementForm({ kind }: { kind: MovementKind }) {
   }
 
   return (
-    <main className={`${poppins.className} app-shell`}>
+    <main className={`${poppins.className} app-shell dashboard-theme`}>
       <div className="app-body">
         <aside className="sidebar">
           <div className="sidebar-brand">
-            <Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" />
+            <Image src="/aims-logo.png" alt="AIMS logo" width={48} height={48} className="object-contain" />
             <p className="sidebar-brand-name">AIMS</p>
           </div>
           <nav className="sidebar-nav" aria-label="Main navigation">

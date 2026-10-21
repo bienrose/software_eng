@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Boxes,
   Check,
+  FileBarChart,
   ClipboardList,
   Home,
   Lightbulb,
@@ -19,8 +20,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import logo from "../../inventory/logo.png";
-import "../../styles/dashboard.css";
 import styles from "../inventory-creator.module.css";
 
 const poppins = Poppins({
@@ -41,8 +40,9 @@ type DraftSchema = {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 const examples = [
@@ -163,11 +163,11 @@ export default function InventoryCreatorPage() {
   }
 
   return (
-    <main className={`${poppins.className} app-shell`}>
+    <main className={`${poppins.className} app-shell dashboard-theme`}>
       <div className="app-body">
         <aside className="sidebar">
           <div className="sidebar-brand">
-            <Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" />
+            <Image src="/aims-logo.png" alt="AIMS logo" width={48} height={48} className="object-contain" />
             <p className="sidebar-brand-name">AIMS</p>
           </div>
 

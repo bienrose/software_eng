@@ -3,9 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ArrowRight, Bell, Boxes, CircleAlert, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
-import logo from "./logo.png";
-import "../styles/dashboard.css";
+import { ArrowRight, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import styles from "./collections.module.css";
 import { useCallback, useEffect, useState } from "react";
 
@@ -13,8 +11,9 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 type InventorySummary = {
@@ -55,10 +54,10 @@ export default function InventoryPage() {
   const totalItems = inventories.reduce((sum, inventory) => sum + inventory.itemCount, 0);
 
   return (
-    <main className={`${poppins.className} app-shell`}>
+    <main className={`${poppins.className} app-shell dashboard-theme`}>
       <div className="app-body">
         <aside className="sidebar">
-          <div className="sidebar-brand"><Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div>
+          <div className="sidebar-brand"><Image src="/aims-logo.png" alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div>
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
@@ -66,7 +65,7 @@ export default function InventoryPage() {
         </aside>
 
         <section className="main">
-          <header className="topbar"><div><h1 className="topbar-title">Inventory</h1><p className="topbar-subtitle">Choose an inventory to view its stock and activity</p></div><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button></header>
+          <header className="topbar"><div><h1 className="topbar-title">Inventory</h1><p className="topbar-subtitle">View your inventories, stock levels, and recent activity.</p></div><div className="topbar-tools"><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button><div className="topbar-profile">JD</div></div></header>
           <div className="page-content">
             <div className={`${styles.content} page-inner`}>
               <div className={styles.intro}><div><p className={styles.eyebrow}>Inventory workspace</p><h2>Your inventories</h2><p>Open an inventory to review its items, stock levels, and recent movements.</p></div><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={15} />Create inventory</Link></div>

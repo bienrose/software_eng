@@ -7,18 +7,17 @@ import { useRouter } from "next/navigation";
 import { Poppins } from "next/font/google";
 import {
   ArrowLeft, ArrowRight, Boxes, Bell, Check, Home, LogOut, PackagePlus, Plus,
-  GripVertical, Sparkles, TrendingUp, Trash2,
+  FileBarChart, GripVertical, Sparkles, TrendingUp, Trash2,
 } from "lucide-react";
-import logo from "../../inventory/logo.png";
-import "../../styles/dashboard.css";
 import styles from "./manual.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
+  { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
-  { href: "/prediction", label: "Prediction", icon: TrendingUp },
+  { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
 
 type InventoryRow = {
@@ -652,10 +651,10 @@ export default function ManualInventoryPage({ inventoryId }: { inventoryId?: str
   }
 
   return (
-    <main className={`${poppins.className} app-shell`}>
+    <main className={`${poppins.className} app-shell dashboard-theme`}>
       <div className="app-body">
         <aside className="sidebar">
-          <div className="sidebar-brand"><Image src={logo} alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div>
+          <div className="sidebar-brand"><Image src="/aims-logo.png" alt="AIMS logo" width={48} height={48} className="object-contain" /><p className="sidebar-brand-name">AIMS</p></div>
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = inventoryId ? item.href === "/inventory" : item.href === "/inventory_creator"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
