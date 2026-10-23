@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ArrowRight, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, ArrowRight, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import styles from "./collections.module.css";
 import { useCallback, useEffect, useState } from "react";
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -92,3 +93,4 @@ export default function InventoryPage() {
     </main>
   );
 }
+

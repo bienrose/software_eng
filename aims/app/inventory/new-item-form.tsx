@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Poppins } from "next/font/google";
-import { ArrowLeft, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, PackagePlus, Save, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, ArrowLeft, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, PackagePlus, Save, Sparkles, TrendingUp } from "lucide-react";
 import styles from "./new-item.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -114,3 +115,4 @@ export default function NewInventoryItemForm({ inventoryId }: { inventoryId: str
     </section>
   </div></main>;
 }
+

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import {
   ArrowDownToLine, ArrowRight, ArrowUpFromLine, Bell, Boxes, CircleAlert,
-  Clock3, FileBarChart, Home, LogOut, PackagePlus, RefreshCw, Search, Sparkles, TrendingUp, X,
+  Clock3, ClipboardList, FileBarChart, Home, LogOut, PackagePlus, RefreshCw, Search, Sparkles, TrendingUp, X,
 } from "lucide-react";
 import styles from "./inventory.module.css";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -212,3 +213,7 @@ export default function InventoryDetailPage({ inventoryId }: { inventoryId: stri
     </main>
   );
 }
+
+
+
+

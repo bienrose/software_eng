@@ -41,6 +41,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -420,5 +421,6 @@ export default function InventoryCreatorPage() {
     </main>
   );
 }
+
 
 

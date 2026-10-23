@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import {
   ArrowDownToLine, ArrowLeft, ArrowUpFromLine, Bell, Boxes, CheckCircle2,
-  CircleAlert, FileBarChart, Home, LogOut, Package, Sparkles, TrendingUp,
+  CircleAlert, ClipboardList, FileBarChart, Home, LogOut, Package, Sparkles, TrendingUp,
 } from "lucide-react";
 import styles from "./movement.module.css";
 type MovementKind = "stock_in" | "stock_out";
@@ -25,6 +25,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -193,3 +194,7 @@ export default function MovementForm({ kind }: { kind: MovementKind }) {
     </main>
   );
 }
+
+
+
+

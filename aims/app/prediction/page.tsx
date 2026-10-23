@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { AlertTriangle, Bell, Boxes, BrainCircuit, CalendarClock, FileBarChart, Home, Lightbulb, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, AlertTriangle, Bell, Boxes, BrainCircuit, CalendarClock, FileBarChart, Home, Lightbulb, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
 import styles from "../styles/analytics.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/inventory", label: "Inventory", icon: Boxes },
   { href: "/reports", label: "Inventory Reports", icon: FileBarChart },
+  { href: "/replenishment", label: "Replenishment", icon: ClipboardList },
   { href: "/inventory_creator", label: "Inventory Creator", icon: Sparkles },
   { href: "/prediction", label: "Demand Prediction", icon: TrendingUp },
 ];
@@ -202,3 +203,4 @@ export default function DemandPredictionPage() {
     </main>
   );
 }
+
