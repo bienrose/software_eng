@@ -2,10 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ShieldCheck } from "lucide-react";
-import { Poppins } from "next/font/google";
 import styles from "../styles/auth-page.module.css";
-
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 
 type AuthPageLayoutProps = {
   logo: string;
@@ -18,7 +15,7 @@ type AuthPageLayoutProps = {
 
 export default function AuthPageLayout({ logo, title, description, eyebrow = "AIMS ACCOUNT", contentClassName, children }: AuthPageLayoutProps) {
   return (
-    <main className={`${poppins.className} ${styles.page}`}>
+    <main className={`admin-auth-page ${styles.page}`}>
       <div className={styles.layout}>
         <section className={styles.brandPanel} aria-label="About AIMS">
           <Link href="/login" className={styles.brand} aria-label="AIMS home">
