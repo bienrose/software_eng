@@ -36,7 +36,7 @@ DB_PASSWORD=your_mysql_password
 DEMAND_SERVICE_URL=http://127.0.0.1:8000
 ```
 
-If the MySQL account has no password, use `DB_PASSWORD=`. Create the database and tables by running `database/schema.sql` in a MySQL client or SQL editor that supports `DELIMITER`. For setup details and schema notes, see [database/README.md](database/README.md).
+If the MySQL account has no password, use `DB_PASSWORD=`. Create the database and tables by running `database/schema.sql` in a MySQL client or SQL editor that supports `DELIMITER`. For setup details and the schema import steps, see `database/README.md`.
 
 Start the Next.js development server:
 
@@ -65,7 +65,7 @@ On macOS or Linux, replace the environment activation command with:
 source .venv/bin/activate
 ```
 
-The service reads the same MySQL settings from the root `.env.local`. It saves its trained model under `demand_service/models/`, which is ignored by Git. Check service availability at <http://127.0.0.1:8000/health>.
+The service reads the same MySQL settings from the root `.env.local`. It saves its trained model under `demand_service/models/`, which is ignored by Git. Check service availability at <http://127.0.0.1:8000/docs>.
 
 ## Main areas
 
@@ -97,9 +97,9 @@ The service reads the same MySQL settings from the root `.env.local`. It saves i
 
 ### Data model
 
-The relational core stores inventories as `inventory_categories` and items as `inventory_items`. Each inventory has versioned schema metadata in `inventory_schema_versions` and `inventory_schema_fields`. Values for inventory-specific fields are stored in each item's `custom_attributes` JSON object.
+The relational core stores inventories as `inventory_categories` and items as `inventory_items`. Each inventory has versioned schema metadata in `inventory_schema_versions` and `inventory_schema_fields`. The schema is versioned so adaptive fields can be changed safely without mutating historical data.
 
-Stock changes are recorded in `inventory_transactions`. Database triggers update the on-hand balance and reject stock-outs that would result in a negative balance. Transactions are append-only; corrections should be recorded as another movement. Demand model artifacts are local files and should not be committed.
+Stock changes are recorded in `inventory_transactions`. Database triggers update the on-hand balance and reject stock-outs that would result in a negative balance. Transactions are append-only; changes to balances are derived from movement history rather than overwritten in place.
 
 ## API overview
 
@@ -127,7 +127,7 @@ npm run build     # Create a production build
 npm run start     # Serve a production build
 ```
 
-For database changes, update `database/schema.sql` with rerunnable DDL where practical and document any migration or data-preservation requirements in `database/README.md`. Do not rely on `CREATE TABLE IF NOT EXISTS` to modify an existing table definition.
+For database changes, update `database/schema.sql` with rerunnable DDL where practical and document any migration or data-preservation requirements in `database/README.md`. Do not rely on `CREATE TABLE` alone for schema updates that need to preserve data.
 
 ## Notes for contributors
 
