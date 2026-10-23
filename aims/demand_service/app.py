@@ -94,6 +94,8 @@ def make_daily_frame(items, transactions, include_target=True):
         return pd.DataFrame()
     transactions_frame = pd.DataFrame(transactions)
     transactions_frame["transaction_date"] = pd.to_datetime(transactions_frame["transaction_date"])
+    transactions_frame["quantity"] = transactions_frame["quantity"].astype(float)
+    transactions_frame["balance_after"] = transactions_frame["balance_after"].astype(float)
     rows = []
     items_by_id = {str(item["item_id"]): item for item in items}
     for item_id, item in items_by_id.items():
@@ -106,7 +108,7 @@ def make_daily_frame(items, transactions, include_target=True):
         demand = history[history["movement_type"] == "stock_out"].groupby("transaction_date")["quantity"].sum()
         balances = history.groupby("transaction_date")["balance_after"].last()
         dates["demand_quantity"] = dates["transaction_date"].map(demand).fillna(0).astype(float)
-        dates["stock_available"] = dates["transaction_date"].map(balances).ffill().bfill().fillna(float(item["quantity_on_hand"]))
+        dates["stock_available"] = dates["transaction_date"].map(balances).ffill().bfill().fillna(float(item["quantity_on_hand"])).astype(float)
         dates["item_id"] = item_id
         dates["category_name"] = str(item["category_name"])
         dates["lead_time_days"] = float(item["lead_time_days"] or 7)
@@ -166,22 +168,21 @@ def train(_: TrainRequest):
     labels = encoder.fit_transform(frame["demand_level"])
     stratify = labels if min(pd.Series(labels).value_counts()) >= 2 else None
     train_features, test_features, train_labels, test_labels = train_test_split(frame[FEATURE_COLUMNS], labels, test_size=0.2, random_state=42, stratify=stratify)
+    if len(set(train_labels)) != len(encoder.classes_):
+        raise HTTPException(status_code=422, detail={"code": "cold_start", "message": "The training split is missing a demand class. Record more stock-out history and train again."})
     preprocessor = ColumnTransformer([
         ("categories", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1), CATEGORICAL_COLUMNS),
         ("numbers", "passthrough", NUMERIC_COLUMNS),
     ])
     classifier = XGBClassifier(
-        objective="multi:softprob",
-        num_class=len(encoder.classes_),
         n_estimators=180,
         max_depth=4,
         learning_rate=0.08,
         subsample=0.9,
         colsample_bytree=0.9,
         random_state=42,
-        eval_metric="mlogloss",
     )
-    pipeline = Pipeline([( "features", preprocessor), ("classifier", classifier)])
+    pipeline = Pipeline([("features", preprocessor), ("classifier", classifier)])
     pipeline.fit(train_features, train_labels)
     predictions = pipeline.predict(test_features)
     classes = list(encoder.classes_)
@@ -200,12 +201,19 @@ def prediction_features(item_id):
     if len(transactions) < 7:
         raise HTTPException(status_code=422, detail={"code": "cold_start", "message": "This item needs at least seven recorded movements before an item-specific demand prediction can be made.", "itemId": item_id, "availableTransactions": len(transactions), "requiredTransactions": 7})
     frame = make_daily_frame(items, transactions)
-    latest = frame.iloc[-1].copy()
+    latest = frame.iloc[-1]
     next_day = pd.Timestamp(date.today() + timedelta(days=1))
-    latest["weekday"] = next_day.weekday()
-    latest["month"] = next_day.month
-    latest["stock_available"] = float(items[0]["quantity_on_hand"])
-    return latest[FEATURE_COLUMNS].to_frame().T
+    row = {
+        "item_id": str(latest["item_id"]),
+        "category_name": str(latest["category_name"]),
+        "rolling_7": float(latest["rolling_7"]),
+        "rolling_30": float(latest["rolling_30"]),
+        "weekday": float(next_day.weekday()),
+        "month": float(next_day.month),
+        "lead_time_days": float(latest["lead_time_days"]),
+        "stock_available": float(items[0]["quantity_on_hand"]),
+    }
+    return pd.DataFrame([row])[FEATURE_COLUMNS]
 
 
 def predict(item_id):
@@ -213,7 +221,7 @@ def predict(item_id):
     features = prediction_features(item_id)
     prediction = int(bundle["pipeline"].predict(features)[0])
     level = str(bundle["labelEncoder"].inverse_transform([prediction])[0])
-    feature_values = {key: float(value) if isinstance(value, (int, float)) else str(value) for key, value in features.iloc[0].to_dict().items()}
+    feature_values = features.iloc[0].to_dict()
     write_prediction(item_id, level, feature_values, bundle["version"])
     return {"itemId": item_id, "demandLevel": level.title().replace("Moderate", "Medium"), "storedDemandLevel": level, "predictionFor": str(date.today() + timedelta(days=1)), "modelVersion": bundle["version"], "features": feature_values}
 
