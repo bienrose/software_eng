@@ -49,7 +49,7 @@ const defaultColumnLabels: ColumnLabels = {
   name: "Item name", code: "Item code", description: "Description", category: "Category", quantity: "Quantity", unit: "Unit",
   reorderLevel: "Reorder level", status: "Status", updated: "Last update",
 };
-const defaultColumnOrder: ColumnKey[] = ["name", "code", "description", "category", "quantity", "unit", "reorderLevel", "status", "updated"];
+const defaultColumnOrder: ColumnKey[] = ["name", "code", "description", "category", "quantity", "unit", "status", "updated"];
 const requiredColumnKeys = new Set<CoreColumnKey>(["name", "quantity", "unit"]);
 
 function parseChoiceOptions(value: string) {
@@ -711,6 +711,7 @@ export default function ManualInventoryPage({ inventoryId }: { inventoryId?: str
     </main>
   );
 }
+
 
 
 

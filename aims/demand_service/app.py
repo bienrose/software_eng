@@ -17,6 +17,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 from xgboost import XGBClassifier
 
+from nlp import infer_schema, parse_stock_command
+
 load_dotenv(Path(__file__).parent.parent / ".env.local")
 app = FastAPI(title="AIMS Demand Prediction Service")
 MODEL_PATH = Path(os.getenv("DEMAND_MODEL_PATH", Path(__file__).parent / "models" / "demand_classifier.joblib"))
@@ -28,6 +30,15 @@ NUMERIC_COLUMNS = [column for column in FEATURE_COLUMNS if column not in CATEGOR
 
 class TrainRequest(BaseModel):
     force: bool = False
+
+
+class StockCommandRequest(BaseModel):
+    text: str
+    items: list[dict] = []  # [{"id": 1, "name": "USB Cable"}, ...]
+
+
+class SchemaRequest(BaseModel):
+    text: str
 
 
 def connection():
@@ -242,3 +253,13 @@ def predict_all():
         except HTTPException as error:
             skipped.append({"itemId": item_id, "reason": error.detail})
     return {"predictions": results, "skipped": skipped}
+
+
+@app.post("/nlp/stock-command")
+def nlp_stock_command(req: StockCommandRequest):
+    return parse_stock_command(req.text, req.items)
+
+
+@app.post("/nlp/infer-schema")
+def nlp_infer_schema(req: SchemaRequest):
+    return infer_schema(req.text)

@@ -35,6 +35,18 @@ type DraftField = {
 type DraftSchema = {
   category: string;
   fields: DraftField[];
+  merged: string[];
+};
+
+type NlpField = {
+  name: string;
+  type: string;
+  suggested?: boolean;
+};
+
+type NlpSchemaResponse = {
+  fields?: NlpField[];
+  core_matches?: { requested: string; core_field: string }[];
 };
 
 const navItems = [
@@ -64,7 +76,44 @@ const examples = [
   },
 ];
 
-const coreFields = ["Item name", "Item code", "Unit", "Quantity on hand", "Reorder level"];
+const coreFields = ["Item name", "Item code", "Unit", "Quantity on hand"];
+
+// Words a user might type that mean the same thing as a core field.
+const coreAliases: Record<string, string[]> = {
+  "Item name": [
+    "item name", "name", "item", "product", "product name", "medicine", "medicine name",
+    "ingredient", "ingredient name", "material", "material name", "supply", "supply name",
+    "item description",
+  ],
+  "Item code": ["item code", "code", "sku", "product code", "item id", "barcode", "item number", "product id"],
+  Unit: ["unit", "uom", "unit of measure", "unit of measurement", "measurement unit"],
+  "Quantity on hand": [
+    "quantity on hand", "quantity", "qty", "stock", "stock on hand", "on hand", "stock level",
+    "current stock", "stock quantity", "available quantity", "quantity available",
+    "amount in stock", "count",
+  ],
+};
+
+const itemNouns =
+  "equipment|tool|tools|device|material|supply|supplies|asset|drug|medicine|product|item|ingredient|part|instrument|goods|food|resource";
+
+function singular(value: string) {
+  return value.length > 3 && value.endsWith("s") ? value.slice(0, -1) : value;
+}
+
+// Returns the core field this name duplicates, or null if it is a genuinely new field.
+function matchCoreField(name: string): string | null {
+  const value = name.toLowerCase().replace(/\s+/g, " ").trim();
+  const candidates = [value, singular(value)];
+  for (const [core, aliases] of Object.entries(coreAliases)) {
+    if (candidates.some((candidate) => aliases.includes(candidate))) return core;
+  }
+  // "Equipment Name", "Tool Name", ... are the item name.
+  if (new RegExp(`^(${itemNouns})\\s+name$`).test(value)) return "Item name";
+  // "Equipment ID", "Asset Code", ... are the item code.
+  if (new RegExp(`^(${itemNouns})\\s+(code|id)$`).test(value)) return "Item code";
+  return null;
+}
 
 function titleCase(value: string) {
   return value
@@ -76,12 +125,21 @@ function titleCase(value: string) {
 
 function inferFieldType(fieldName: string) {
   const value = fieldName.toLowerCase();
-  if (/(date|expires|expiration|expiry|maintenance)/.test(value)) return "Date";
-  if (/(quantity|amount|count|number|stock|level)/.test(value)) return "Number";
+  // Identifiers first, so "Batch Number" stays Text instead of Number.
+  if (/\b(batch|lot|serial|model|sku|barcode|code|id|reference|ref|invoice|po|phone|contact|mobile|zip|postal|license|licence|registration)\b/.test(value)) return "Text";
+  if (/(date|expires|expiration|expiry|maintenance|manufactur)/.test(value)) return "Date";
+  if (/(quantity|amount|count|number|stock|level|price|cost|weight)/.test(value)) return "Number";
   if (/(status|condition|type|category)/.test(value)) return "Choice";
   return "Text";
 }
 
+function noteMerge(merged: string[], requested: string, core: string) {
+  if (requested.toLowerCase() === core.toLowerCase()) return;
+  const note = `${requested} → ${core}`;
+  if (!merged.includes(note)) merged.push(note);
+}
+
+// Built-in parser. Used on its own if the NLP service is not running.
 function createDraftSchema(description: string): DraftSchema {
   const categoryMatch = description.match(
     /(?:inventory\s+for|manage|track|create\s+(?:an?\s+)?inventory\s+for)\s+(.+?)(?=\s+(?:with|containing|including|that\s+includes)\b|[.!?]|$)/i,
@@ -91,20 +149,59 @@ function createDraftSchema(description: string): DraftSchema {
   );
 
   const category = titleCase(categoryMatch?.[1] ?? "New inventory");
+  const merged: string[] = [];
   const fields = (fieldMatch?.[1] ?? "")
     .replace(/\band\b/gi, ",")
     .split(/[;,]/)
     .map((field) => titleCase(field.replace(/^(?:a|an|the)\s+/i, "")))
     .filter(Boolean)
-    .filter((field) => !coreFields.some((core) => core.toLowerCase() === field.toLowerCase()));
+    .filter((field) => {
+      const core = matchCoreField(field);
+      if (core) noteMerge(merged, field, core);
+      return !core;
+    });
 
   return {
     category,
+    merged,
     fields: Array.from(new Set(fields)).map((name) => ({
       name,
       type: inferFieldType(name),
     })),
   };
+}
+
+function nlpFieldType(nlpType: string, name: string) {
+  if (nlpType === "date") return "Date";
+  if (nlpType === "number") return "Number";
+  return inferFieldType(name) === "Choice" ? "Choice" : "Text";
+}
+
+// Combine the NLP service result with the local category name.
+function mergeNlpSchema(local: DraftSchema, nlp: NlpSchemaResponse): DraftSchema {
+  const merged: string[] = [];
+  (nlp.core_matches ?? []).forEach((match) => noteMerge(merged, match.requested, match.core_field));
+
+  const seen = new Set<string>();
+  const fields: DraftField[] = [];
+  (nlp.fields ?? [])
+    .filter((field) => !field.suggested)
+    .forEach((field) => {
+      const name = titleCase(field.name);
+      const key = name.toLowerCase();
+      if (!name || seen.has(key)) return;
+      seen.add(key);
+      const core = matchCoreField(name);
+      if (core) {
+        noteMerge(merged, name, core);
+        return;
+      }
+      fields.push({ name, type: nlpFieldType(field.type, name) });
+    });
+
+  // If the service found nothing, trust the built-in parser instead.
+  if (fields.length === 0 && merged.length === 0) return local;
+  return { category: local.category, fields, merged };
 }
 
 export default function InventoryCreatorPage() {
@@ -113,8 +210,9 @@ export default function InventoryCreatorPage() {
   const [draft, setDraft] = useState<DraftSchema | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedDescription = description.trim();
 
@@ -125,7 +223,24 @@ export default function InventoryCreatorPage() {
     }
 
     setError("");
-    setDraft(createDraftSchema(trimmedDescription));
+    setPreviewing(true);
+    const local = createDraftSchema(trimmedDescription);
+    let result = local;
+    try {
+      const response = await fetch("/api/nlp/infer-schema", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: trimmedDescription }),
+      });
+      if (response.ok) {
+        const nlp = (await response.json()) as NlpSchemaResponse;
+        result = mergeNlpSchema(local, nlp);
+      }
+    } catch {
+      // NLP service is off: keep the built-in result.
+    }
+    setDraft(result);
+    setPreviewing(false);
   }
 
   function chooseExample(prompt: string) {
@@ -291,11 +406,11 @@ export default function InventoryCreatorPage() {
                   <div className={styles.formFooter}>
                     <span className={styles.localNote}>
                       <Lightbulb size={14} />
-                      Front-end preview only
+                      Review before anything is saved
                     </span>
-                    <button className={styles.generateButton} type="submit">
+                    <button className={styles.generateButton} type="submit" disabled={previewing}>
                       <Sparkles size={15} />
-                      Preview structure
+                      {previewing ? "Previewing…" : "Preview structure"}
                     </button>
                   </div>
                 </form>
@@ -384,7 +499,7 @@ export default function InventoryCreatorPage() {
                             <td>
                               <span className={styles.fieldName}>{field}</span>
                             </td>
-                            <td>{field === "Quantity on hand" || field === "Reorder level" ? "Number" : "Text"}</td>
+                            <td>{field === "Quantity on hand" ? "Number" : "Text"}</td>
                             <td><span className={styles.coreBadge}>Core field</span></td>
                           </tr>
                         ))}
@@ -406,6 +521,12 @@ export default function InventoryCreatorPage() {
                     </table>
                   </div>
 
+                  {draft.merged.length > 0 && (
+                    <div className={styles.previewFootnote}>
+                      <Check size={14} />
+                      Already covered by core fields: {draft.merged.join(", ")}
+                    </div>
+                  )}
                   <div className={styles.previewFootnote}>
                     <Lightbulb size={14} />
                     Review this suggested schema before creating the inventory in aims_db.
@@ -421,6 +542,4 @@ export default function InventoryCreatorPage() {
     </main>
   );
 }
-
-
 

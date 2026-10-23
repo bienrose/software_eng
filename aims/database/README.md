@@ -8,7 +8,7 @@ This folder contains the relational schema for **MySQL 8.0.16 or later**. The Ne
 
 ## Core and adaptive data model
 
-The core model keeps stable inventory facts in columns: category, item code, name, unit, on-hand quantity, and reorder level. Inventory movement history is recorded in `inventory_transactions`; a trigger updates on-hand quantity, rejects stock-outs that would make it negative, and records the resulting balance. Transaction rows are append-only; record a compensating movement to correct an earlier entry.
+The core model keeps stable inventory facts in columns: category, item code, name, unit, on-hand quantity, and reorder level. The `reorder_level` column remains an operational stock threshold used by low-stock and replenishment logic, but new schema generation does not add it to the generated core-field list. Inventory movement history is recorded in `inventory_transactions`; a trigger updates on-hand quantity, rejects stock-outs that would make it negative, and records the resulting balance. Transaction rows are append-only; record a compensating movement to correct an earlier entry.
 
 Adaptive fields are stored as versioned metadata:
 
@@ -59,3 +59,4 @@ MySQL runs DDL statements with implicit commits, so if an error interrupts first
 - Existing item fields stay stable, while category-specific fields are stored in JSON and defined by schema metadata.
 - Schema generation produces drafts that must be reviewed before activation.
 - The application generates UUID v4 IDs and validates custom values against the item's schema version.
+

@@ -181,7 +181,7 @@ export async function POST(request: Request) {
     ...coreLabelKeys.filter((key) => key !== "category"),
     ...normalizedFields.map((field) => `field:${field.label}`),
   ]);
-  const defaultColumnOrder = ["name", "code", "description", "quantity", "unit", "reorderLevel", "status", "updated",
+  const defaultColumnOrder = ["name", "code", "description", "quantity", "unit", "status", "updated",
     ...normalizedFields.map((field) => `field:${field.label}`)];
   const requestedColumnOrder = Array.isArray(providedLabels.columnOrder)
     ? providedLabels.columnOrder.filter((key): key is string => typeof key === "string" && validColumnKeys.has(key))
@@ -260,3 +260,4 @@ export async function POST(request: Request) {
     return databaseErrorResponse(error);
   }
 }
+
