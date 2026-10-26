@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         SELECT i.id, i.name, i.unit, c.name AS category_name, COALESCE(SUM(t.quantity), 0) AS quantity_used
         FROM inventory_items i
         INNER JOIN inventory_categories c ON c.id = i.category_id
-        LEFT JOIN inventory_transactions t ON t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND DATE(t.occurred_at) BETWEEN ? AND ?
+        LEFT JOIN inventory_transactions t ON t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND (t.reference IS NULL OR t.reference <> 'demand-sample-demo-adjustment') AND DATE(t.occurred_at) BETWEEN ? AND ?
         WHERE i.is_active = TRUE AND c.archived_at IS NULL${categoryClause}
         GROUP BY i.id, i.name, i.unit, c.name
         ORDER BY quantity_used DESC, i.name ASC LIMIT 10`, [dateFrom, dateTo, ...categoryParams]);
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         GROUP BY c.id, c.name ORDER BY c.name ASC`, categoryParams);
       const [predictionRows] = await connection.execute<RowDataPacket[]>(`
         SELECT p.id, p.inventory_item_id AS item_id, i.name AS item_name, c.name AS category_name, p.demand_level, p.prediction_for,
-          COALESCE(SUM(CASE WHEN t.movement_type = 'stock_out' THEN t.quantity ELSE 0 END), 0) AS actual_quantity
+          COALESCE(SUM(CASE WHEN t.movement_type = 'stock_out' AND (t.reference IS NULL OR t.reference <> 'demand-sample-demo-adjustment') THEN t.quantity ELSE 0 END), 0) AS actual_quantity
         FROM demand_predictions p
         INNER JOIN inventory_items i ON i.id = p.inventory_item_id
         INNER JOIN inventory_categories c ON c.id = i.category_id

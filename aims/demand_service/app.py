@@ -91,11 +91,12 @@ def transaction_rows(item_id=None):
     query = """
         SELECT inventory_item_id AS item_id, movement_type, quantity, balance_after, DATE(occurred_at) AS transaction_date
         FROM inventory_transactions
+        WHERE (reference IS NULL OR reference <> %s)
     """
-    params = ()
+    params = ("demand-sample-demo-adjustment",)
     if item_id:
-        query += " WHERE inventory_item_id = %s"
-        params = (item_id,)
+        query += " AND inventory_item_id = %s"
+        params += (item_id,)
     query += " ORDER BY occurred_at ASC"
     return read_rows(query, params)
 

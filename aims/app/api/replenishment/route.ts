@@ -15,8 +15,8 @@ export async function GET() {
       const [rows] = await connection.execute<RowDataPacket[]>(`
         SELECT i.id, i.name, i.item_code, i.unit, i.quantity_on_hand, i.reorder_level, c.name AS category_name,
           COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(i.custom_attributes, '$.lead_time_days')) AS DECIMAL(10, 2)), 7) AS lead_time_days,
-          COALESCE((SELECT SUM(t.quantity) FROM inventory_transactions t WHERE t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND t.occurred_at >= DATE_SUB(CURRENT_TIMESTAMP(3), INTERVAL 30 DAY)), 0) AS used_last_30_days,
-          COALESCE((SELECT MAX(t.quantity) FROM inventory_transactions t WHERE t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND t.occurred_at >= DATE_SUB(CURRENT_TIMESTAMP(3), INTERVAL 30 DAY)), 0) AS max_daily_used,
+          COALESCE((SELECT SUM(t.quantity) FROM inventory_transactions t WHERE t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND (t.reference IS NULL OR t.reference <> 'demand-sample-demo-adjustment') AND t.occurred_at >= DATE_SUB(CURRENT_TIMESTAMP(3), INTERVAL 30 DAY)), 0) AS used_last_30_days,
+          COALESCE((SELECT MAX(t.quantity) FROM inventory_transactions t WHERE t.inventory_item_id = i.id AND t.movement_type = 'stock_out' AND (t.reference IS NULL OR t.reference <> 'demand-sample-demo-adjustment') AND t.occurred_at >= DATE_SUB(CURRENT_TIMESTAMP(3), INTERVAL 30 DAY)), 0) AS max_daily_used,
           (SELECT p.demand_level FROM demand_predictions p WHERE p.inventory_item_id = i.id AND p.prediction_mode = 'classification' ORDER BY p.generated_at DESC LIMIT 1) AS demand_level
         FROM inventory_items i INNER JOIN inventory_categories c ON c.id = i.category_id
         WHERE i.is_active = TRUE AND c.archived_at IS NULL

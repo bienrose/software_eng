@@ -32,6 +32,7 @@ export async function GET() {
         LEFT JOIN inventory_transactions t
           ON t.inventory_item_id = i.id
           AND t.occurred_at >= DATE_SUB(CURRENT_TIMESTAMP(3), INTERVAL 30 DAY)
+          AND (t.reference IS NULL OR t.reference <> 'demand-sample-demo-adjustment')
         WHERE c.archived_at IS NULL
         GROUP BY c.id, c.name, i.id, i.name, i.item_code, i.unit, i.quantity_on_hand, i.reorder_level
         ORDER BY c.name ASC, i.name ASC`);
