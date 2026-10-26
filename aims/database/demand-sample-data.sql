@@ -19,3 +19,9 @@ SELECT UUID(), '10000000-0000-4000-8000-000000000003', 'stock_out',
 FROM days
 WHERE day_offset % 3 <> 0
   AND NOT EXISTS (SELECT 1 FROM inventory_transactions WHERE reference = 'demand-sample');
+
+INSERT INTO inventory_transactions (id, inventory_item_id, movement_type, quantity, balance_after, reference, notes)
+SELECT UUID(), '10000000-0000-4000-8000-000000000003', 'stock_out', 300, 0,
+  'demand-sample-demo-adjustment', 'Demo stock reduction to make replenishment visible'
+WHERE EXISTS (SELECT 1 FROM inventory_items WHERE id = '10000000-0000-4000-8000-000000000003')
+  AND NOT EXISTS (SELECT 1 FROM inventory_transactions WHERE reference = 'demand-sample-demo-adjustment');

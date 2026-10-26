@@ -112,11 +112,15 @@ export default function DemandPredictionPage() {
             : daysRemaining !== null && daysRemaining <= 30
               ? "Reorder soon"
               : "On track";
-      const recommended = dailyRate > 0
+      const stockGap = dailyRate > 0
         ? Math.max(item.reorderLevel + item.issuedLast30Days - item.quantity, 0)
         : item.quantity <= item.reorderLevel
           ? Math.max(item.reorderLevel * 2 - item.quantity, 0)
           : 0;
+      const predictedLevel = predictions.find((prediction) => prediction.itemId === item.id)?.demandLevel;
+      const demandShare = predictedLevel === "High" ? 0.5 : predictedLevel === "Medium" ? 0.25 : 0.1;
+      const classBasedQuantity = Math.max(1, Math.ceil(item.issuedLast30Days * demandShare));
+      const recommended = Math.max(stockGap, classBasedQuantity);
       return { ...item, dailyRate, daysRemaining, recommended, status };
     })
     .sort((a, b) => {
@@ -125,7 +129,7 @@ export default function DemandPredictionPage() {
       const aRisk = a.quantity <= a.reorderLevel ? 0 : aDays <= 30 ? 1 : a.dailyRate === 0 ? 3 : 2;
       const bRisk = b.quantity <= b.reorderLevel ? 0 : bDays <= 30 ? 1 : b.dailyRate === 0 ? 3 : 2;
       return aRisk - bRisk || aDays - bDays || a.name.localeCompare(b.name);
-    }), [items, selectedInventory]);
+    }), [items, predictions, selectedInventory]);
 
   const metrics = useMemo(() => ({
     monthlyDemand: forecasts.reduce((sum, item) => sum + item.issuedLast30Days, 0),
@@ -169,7 +173,7 @@ export default function DemandPredictionPage() {
                 </div>
               </div>
 
-              <div className={styles.notice}><Lightbulb size={15} /><span>Training uses item, category, 7 and 30 day demand averages, calendar fields, lead time, and stock available. Items with too little history return a clear cold-start result instead of a fabricated prediction.</span></div>
+              <div className={styles.notice}><Lightbulb size={15} /><span>Training uses item, category, 7 and 30 day demand averages, calendar fields, lead time, and stock available. Recommended replenishment shows a demand-class top-up estimate (Low 10%, Medium 25%, High 50% of 30-day usage, minimum 1 unit) or the larger stock gap. Treat this estimate as a planning demo and check stock before ordering.</span></div>
               {error && <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={() => void loadForecast()}>Retry</button></div>}
 
               {trainingResult?.metrics && <section className={styles.panel} aria-label="Demand model evaluation"><div className={styles.panelHeader}><h3 className={styles.panelTitle}>Latest model evaluation</h3><span className={styles.panelMeta}>{trainingResult.modelVersion} · {trainingResult.trainingRows} training rows · {trainingResult.testRows} test rows</span></div><div className={styles.metrics}><article className={styles.metric}><div className={styles.metricTop}><span>Accuracy</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.accuracy * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Precision</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.precision * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Recall</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.recall * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>F1 score</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.f1 * 100).toFixed(1)}%</div></article></div></section>}
