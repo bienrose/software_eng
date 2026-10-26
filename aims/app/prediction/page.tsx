@@ -180,7 +180,7 @@ export default function DemandPredictionPage() {
 
               <section className={styles.panel} aria-label="Demand forecast by item">
                 <div className={styles.panelHeader}><h3 className={styles.panelTitle}>Item demand outlook</h3><span className={styles.panelMeta}>{loading ? "Loading forecast…" : `${forecasts.length} items`}</span></div>
-                {loading ? <div className={styles.state}>Loading demand data…</div> : error ? null : forecasts.length === 0 ? <div className={styles.state}>{items.length === 0 ? "No inventory items are available for forecasting yet." : "No items in this inventory."}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Item</th><th>Predicted demand</th><th>On hand</th><th>Issued · 30d</th><th>Est. days cover</th><th>Status</th></tr></thead><tbody>
+                {loading ? <div className={styles.state}>Loading demand data…</div> : error ? null : forecasts.length === 0 ? <div className={styles.state}>{items.length === 0 ? "No inventory items are available for forecasting yet." : "No items in this inventory."}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Item</th><th>Predicted demand</th><th>On hand</th><th>Issued · 30d</th><th>Est. days cover</th><th>Recommended replenishment</th><th>Status</th></tr></thead><tbody>
                   {forecasts.map((item) => {
                     const coverPercent = item.daysRemaining === null ? 0 : Math.max(0, Math.min(100, item.daysRemaining / 60 * 100));
                     const coverageClass = item.quantity <= 0 ? styles.coverageFillEmpty : item.daysRemaining !== null && item.daysRemaining <= 30 ? styles.coverageFillRisk : styles.coverageFill;
@@ -191,6 +191,7 @@ export default function DemandPredictionPage() {
                       <td className={styles.number}>{numberFormat.format(item.quantity)} {item.unit}</td>
                       <td className={styles.number}>{numberFormat.format(item.issuedLast30Days)} {item.unit}</td>
                       <td>{item.daysRemaining === null ? <span className={styles.badgeNeutral}>No history</span> : <span className={styles.coverage}><span className={styles.number}>{numberFormat.format(item.daysRemaining)} days</span><span className={styles.coverageTrack}><span className={`${styles.coverageFill} ${coverageClass}`} style={{ width: `${coverPercent}%` }} /></span></span>}</td>
+                      <td className={styles.number}>{item.recommended > 0 ? `${numberFormat.format(item.recommended)} ${item.unit}` : "—"}</td>
                       <td><span className={`${styles.badge} ${badgeClass}`}>{item.status}</span></td>
                     </tr>;
                   })}
