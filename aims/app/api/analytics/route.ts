@@ -26,6 +26,7 @@ export async function GET() {
         SELECT c.id AS inventory_id, c.name AS inventory_name,
           i.id AS item_id, i.name AS item_name, i.item_code, i.unit,
           i.quantity_on_hand, i.reorder_level,
+          COALESCE(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(i.custom_attributes, '$.lead_time_days')) AS DECIMAL(10, 2))), 7) AS lead_time_days,
           COALESCE(SUM(CASE WHEN t.movement_type = 'stock_out' THEN t.quantity ELSE 0 END), 0) AS issued_last_30_days
         FROM inventory_categories c
         INNER JOIN inventory_items i ON i.category_id = c.id AND i.is_active = TRUE
@@ -56,6 +57,7 @@ export async function GET() {
           unit: String(row.unit),
           quantity: asNumber(row.quantity_on_hand),
           reorderLevel: asNumber(row.reorder_level),
+          leadTimeDays: asNumber(row.lead_time_days) || 7,
           issuedLast30Days: asNumber(row.issued_last_30_days),
         })),
       };

@@ -26,11 +26,12 @@ type ForecastItem = {
   unit: string;
   quantity: number;
   reorderLevel: number;
+  leadTimeDays: number;
   issuedLast30Days: number;
 };
 type InventoryOption = { id: string; name: string };
 type AnalyticsResponse = { inventories: InventoryOption[]; items: ForecastItem[]; error?: string };
-type Forecast = ForecastItem & { dailyRate: number; daysRemaining: number | null; recommended: number; status: string };
+type Forecast = ForecastItem & { dailyRate: number; leadTimeDemand: number; daysRemaining: number | null; recommended: number; status: string };
 type DemandPrediction = { itemId: string; demandLevel: "Low" | "Medium" | "High"; predictionFor: string; modelVersion: string };
 type DemandResponse = { predictions?: DemandPrediction[]; skipped?: Array<{ itemId: string; reason: unknown }>; error?: string; detail?: { message?: string } };
 type TrainingResult = { modelVersion?: string; trainingRows?: number; testRows?: number; metrics?: { accuracy: number; precision: number; recall: number; f1: number; confusionMatrix: { labels: string[]; values: number[][] } }; error?: string };
@@ -102,6 +103,7 @@ export default function DemandPredictionPage() {
     .filter((item) => selectedInventory === "all" || item.inventoryId === selectedInventory)
     .map((item) => {
       const dailyRate = item.issuedLast30Days / 30;
+      const leadTimeDemand = Math.ceil(dailyRate * item.leadTimeDays);
       const daysRemaining = dailyRate > 0 ? item.quantity / dailyRate : null;
       const status = item.quantity <= 0
         ? "Out of stock"
@@ -112,11 +114,8 @@ export default function DemandPredictionPage() {
             : daysRemaining !== null && daysRemaining <= 30
               ? "Reorder soon"
               : "On track";
-      const predictedLevel = predictions.find((prediction) => prediction.itemId === item.id)?.demandLevel;
-      const demandShare = predictedLevel === "Low" ? 0.1 : predictedLevel === "High" ? 1 : 0.5;
-      const targetDemand = Math.ceil(item.issuedLast30Days * demandShare);
-      const recommended = Math.max(0, item.reorderLevel + targetDemand - item.quantity);
-      return { ...item, dailyRate, daysRemaining, recommended, status };
+      const recommended = Math.max(0, item.reorderLevel + leadTimeDemand - item.quantity);
+      return { ...item, dailyRate, leadTimeDemand, daysRemaining, recommended, status };
     })
     .sort((a, b) => {
       const aDays = a.daysRemaining ?? Number.POSITIVE_INFINITY;
@@ -168,7 +167,7 @@ export default function DemandPredictionPage() {
                 </div>
               </div>
 
-              <div className={styles.notice}><Lightbulb size={15} /><span>Replenishment scales the 30-day usage target by predicted demand: Low 10%, Medium 50%, High 100%. The suggested quantity also accounts for on-hand stock and the reorder level. Check supplier pack sizes before ordering.</span></div>
+              <div className={styles.notice}><Lightbulb size={15} /><span>Demand level classifies the next 30 days of expected usage. Suggested order = max(0, reorder level + average daily usage × supplier lead time − stock on hand). The demand category does not multiply the order quantity. Check supplier pack sizes before ordering.</span></div>
               {error && <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={() => void loadForecast()}>Retry</button></div>}
 
               {trainingResult?.metrics && <section className={styles.panel} aria-label="Demand model evaluation"><div className={styles.panelHeader}><h3 className={styles.panelTitle}>Latest model evaluation</h3><span className={styles.panelMeta}>{trainingResult.modelVersion} · {trainingResult.trainingRows} training rows · {trainingResult.testRows} test rows</span></div><div className={styles.metrics}><article className={styles.metric}><div className={styles.metricTop}><span>Accuracy</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.accuracy * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Precision</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.precision * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Recall</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.recall * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>F1 score</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.f1 * 100).toFixed(1)}%</div></article></div></section>}

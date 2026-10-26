@@ -23,6 +23,7 @@ load_dotenv(Path(__file__).parent.parent / ".env.local")
 app = FastAPI(title="AIMS Demand Prediction Service")
 MODEL_PATH = Path(os.getenv("DEMAND_MODEL_PATH", Path(__file__).parent / "models" / "demand_classifier.joblib"))
 MINIMUM_TRAINING_ROWS = 30
+DEMAND_HORIZON_DAYS = 30
 FEATURE_COLUMNS = ["item_id", "category_name", "rolling_7", "rolling_30", "weekday", "month", "lead_time_days", "stock_available"]
 CATEGORICAL_COLUMNS = ["item_id", "category_name"]
 NUMERIC_COLUMNS = [column for column in FEATURE_COLUMNS if column not in CATEGORICAL_COLUMNS]
@@ -133,23 +134,28 @@ def make_daily_frame(items, transactions, include_target=True):
 
 
 def assign_levels(frame):
+    future_demand = frame.groupby("item_id")["demand_quantity"].transform(
+        lambda values: values.shift(-1).iloc[::-1].rolling(DEMAND_HORIZON_DAYS, min_periods=DEMAND_HORIZON_DAYS).sum().iloc[::-1]
+    )
+    positive_demand = future_demand.dropna()
+    positive_demand = positive_demand[positive_demand > 0]
+    if positive_demand.empty:
+        return pd.Series("low", index=frame.index, dtype="object"), future_demand
+    low_threshold = positive_demand.quantile(1 / 3)
+    high_threshold = positive_demand.quantile(2 / 3)
     labels = pd.Series("low", index=frame.index, dtype="object")
-    for item_id, group in frame.groupby("item_id"):
-        positive = group.loc[group["demand_quantity"] > 0, "demand_quantity"]
-        if positive.empty:
-            continue
-        threshold = positive.quantile(0.7)
-        moderate_mask = (frame["item_id"] == item_id) & (frame["demand_quantity"] > 0) & (frame["demand_quantity"] <= threshold)
-        high_mask = (frame["item_id"] == item_id) & (frame["demand_quantity"] > threshold)
-        labels.loc[moderate_mask] = "moderate"
-        labels.loc[high_mask] = "high"
-    return labels
+    labels.loc[future_demand > low_threshold] = "moderate"
+    labels.loc[future_demand > high_threshold] = "high"
+    return labels, future_demand
 
 
 def load_bundle():
     if not MODEL_PATH.exists():
         raise HTTPException(status_code=409, detail={"code": "model_not_trained", "message": "No trained demand model exists. Train the model after recording enough stock-out history."})
-    return joblib.load(MODEL_PATH)
+    bundle = joblib.load(MODEL_PATH)
+    if bundle.get("demandHorizonDays") != DEMAND_HORIZON_DAYS:
+        raise HTTPException(status_code=409, detail={"code": "model_retrain_required", "message": "The demand forecast definition changed. Train the model again before generating predictions."})
+    return bundle
 
 
 def model_metrics(labels, predictions, classes):
@@ -173,7 +179,10 @@ def train(_: TrainRequest):
     frame = make_daily_frame(item_rows(), transaction_rows())
     if len(frame) < MINIMUM_TRAINING_ROWS:
         raise HTTPException(status_code=422, detail={"code": "cold_start", "message": f"At least {MINIMUM_TRAINING_ROWS} item-days of stock movement history are required before training.", "availableRows": int(len(frame)), "requiredRows": MINIMUM_TRAINING_ROWS})
-    frame["demand_level"] = assign_levels(frame)
+    frame["demand_level"], future_demand = assign_levels(frame)
+    frame = frame.loc[future_demand.notna()].copy()
+    if len(frame) < MINIMUM_TRAINING_ROWS:
+        raise HTTPException(status_code=422, detail={"code": "cold_start", "message": "At least 30 complete item-days with a following 30-day demand window are required before training."})
     if frame["demand_level"].nunique() < 2:
         raise HTTPException(status_code=422, detail={"code": "cold_start", "message": "Stock-out history does not yet contain enough variation to train Low, Medium, and High demand classes."})
     encoder = LabelEncoder()
@@ -201,7 +210,7 @@ def train(_: TrainRequest):
     metrics = model_metrics(encoder.inverse_transform(test_labels), encoder.inverse_transform(predictions.astype(int)), classes)
     version = datetime.now(timezone.utc).strftime("xgb-%Y%m%d%H%M%S")
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump({"pipeline": pipeline, "labelEncoder": encoder, "version": version, "metrics": metrics, "trainedAt": datetime.now(timezone.utc).isoformat()}, MODEL_PATH)
+    joblib.dump({"pipeline": pipeline, "labelEncoder": encoder, "version": version, "metrics": metrics, "trainedAt": datetime.now(timezone.utc).isoformat(), "demandHorizonDays": DEMAND_HORIZON_DAYS}, MODEL_PATH)
     return {"message": "Demand model trained successfully.", "modelVersion": version, "trainingRows": int(len(frame)), "testRows": int(len(test_features)), "metrics": metrics}
 
 
