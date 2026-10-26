@@ -114,9 +114,8 @@ export default function DemandPredictionPage() {
               : "On track";
       const predictedLevel = predictions.find((prediction) => prediction.itemId === item.id)?.demandLevel;
       const demandShare = predictedLevel === "Low" ? 0.1 : predictedLevel === "High" ? 1 : 0.5;
-      const classBasedQuantity = Math.max(1, Math.ceil(item.issuedLast30Days * demandShare));
-      const stockGap = Math.max(item.reorderLevel + classBasedQuantity - item.quantity, 0);
-      const recommended = Math.max(stockGap, classBasedQuantity);
+      const targetDemand = Math.ceil(item.issuedLast30Days * demandShare);
+      const recommended = Math.max(0, item.reorderLevel + targetDemand - item.quantity);
       return { ...item, dailyRate, daysRemaining, recommended, status };
     })
     .sort((a, b) => {
