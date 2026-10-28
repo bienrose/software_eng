@@ -32,12 +32,15 @@
 .addItemButton { display:inline-flex; min-height:32px; align-items:center; justify-content:center; gap:5px; padding:0 11px; border:1px solid var(--green-dark); border-radius:6px; background:var(--green-dark); color:#fff; font:inherit; font-size:10px; font-weight:600; box-shadow:0 2px 5px rgba(16,60,32,.12); cursor:pointer; transition:background .15s ease,transform .15s ease; }
 .addItemButton:hover { background:var(--green-dark-hover); transform:translateY(-1px); }
 .addItemButton:focus-visible { outline:3px solid rgba(20,92,50,.2); outline-offset:2px; }
-.sheet { width:100%; min-width:920px; border-collapse:collapse; text-align:left; }
+.sheet { width:100%; min-width:920px; table-layout:fixed; border-collapse:collapse; text-align:left; }
+.dataColumn { width:184px; }
+.descriptionColumn { width:240px; }
+.actionColumn { width:56px; }
 .sheet th { height:auto; min-height:38px; padding:8px 9px; vertical-align:top; background:#f8fbf8; color:var(--green-muted); font-size:9px; font-weight:700; white-space:nowrap; }
 .sheet .headerInput { display:block; width:100%; min-width:90px; height:28px; padding:0 6px; border:1px solid transparent; border-radius:4px; outline:none; background:transparent; color:var(--green-dark); font:inherit; font-size:9px; font-weight:700; }
 .sheet .headerInput:hover { border-color:#d9e6da; background:#fff; }
 .sheet .headerInput:focus { border-color:var(--green-dark); background:#fff; }
-.columnHeader { display:grid; min-width:160px; grid-template-columns:22px minmax(90px,1fr) 25px; align-items:center; gap:4px; }
+.columnHeader { display:grid; width:100%; min-width:0; grid-template-columns:22px minmax(0,1fr) 25px; align-items:center; gap:4px; }
 .columnHeader .headerInput { min-width:0; }
 .columnHeader .customFieldControls { grid-column:1 / -1; }
 .dragHandle { display:inline-flex; width:22px; height:26px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:#829385; cursor:grab; }
@@ -53,12 +56,11 @@
 .sheet .choiceOptions { height:26px; flex:1 1 150px; padding:0 5px; }
 .customFieldControls button { display:inline-flex; flex:0 0 auto; width:24px; height:24px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:var(--red); cursor:pointer; }
 .customFieldControls button:hover { background:var(--red-bg); }
-.sheet td { height:48px; padding:5px 7px; border-top:1px solid #edf2ed; }
+.sheet td { height:48px; padding:5px 9px; border-top:1px solid #edf2ed; }
 .sheet tbody tr:hover { background:#fbfdfb; }
-.sheet input,.sheet select { width:100%; min-width:78px; height:32px; padding:0 7px; border:1px solid transparent; border-radius:5px; outline:none; background:transparent; color:var(--green-dark); font:inherit; font-size:10px; }
+.sheet input,.sheet select { width:100%; min-width:0; height:32px; padding:0 6px; border:1px solid transparent; border-radius:5px; outline:none; background:transparent; color:var(--green-dark); font:inherit; font-size:10px; }
 .sheet input:hover,.sheet select:hover { border-color:#d9e6da; background:white; }
 .sheet input:focus,.sheet select:focus { border-color:var(--green-dark); background:white; box-shadow:0 0 0 2px rgba(20,92,50,.07); }
-.sheet input[type="number"] { min-width:75px; }
 .statusBadge { display:inline-flex; padding:4px 7px; border:1px solid transparent; border-radius:5px; font-size:9px; font-weight:600; white-space:nowrap; }
 .statusIn { border-color:var(--green-border); background:var(--green-light); color:var(--green-dark); }
 .statusLow { border-color:var(--yellow-border); background:var(--yellow-bg); color:var(--yellow); }
