@@ -66,7 +66,7 @@
 .admin-metric { padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-sm); }
 .admin-metric-label { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 600; }
 .admin-metric-value { margin-top: var(--space-2); font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.02em; }
-.admin-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
 .admin-panel { overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-sm); }
 .admin-panel-header { display: flex; min-height: 48px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 0 var(--space-4); border-bottom: 1px solid var(--color-border); }
 .admin-panel-title { margin: 0; font-size: var(--text-sm); font-weight: 700; }
@@ -75,8 +75,6 @@
 .admin-bar-row { display: grid; grid-template-columns: minmax(96px, 1fr) minmax(96px, 2fr) auto; gap: var(--space-2); align-items: center; font-size: var(--text-xs); }
 .admin-bar-track { height: 8px; overflow: hidden; border-radius: var(--radius-sm); background: var(--color-surface-subtle); }
 .admin-bar-fill { display: block; width: var(--bar-value); height: 100%; border-radius: inherit; background: var(--color-accent); }
-.admin-pie { display: grid; width: 144px; height: 144px; margin: var(--space-2) auto; place-items: center; border-radius: 50%; background: conic-gradient(var(--color-accent) 0 25%, var(--color-success) 25% 50%, var(--color-warning) 50% 75%, var(--color-border) 75% 100%); }
-.admin-pie-center { display: grid; width: 96px; height: 96px; place-items: center; border-radius: 50%; background: var(--color-surface); color: var(--color-text-muted); font-size: var(--text-xs); text-align: center; }
 .admin-table-wrap { overflow: auto; }
 .admin-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: var(--text-sm); }
 .admin-table th { position: sticky; top: 0; z-index: 1; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); background: var(--color-surface-subtle); color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; }
