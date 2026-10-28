@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ClipboardList, AlertTriangle, Bell, Boxes, BrainCircuit, CalendarClock, FileBarChart, Home, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, AlertTriangle, Bell, Boxes, CalendarClock, FileBarChart, Home, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
 import styles from "../styles/analytics.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -34,7 +34,6 @@ type AnalyticsResponse = { inventories: InventoryOption[]; items: ForecastItem[]
 type Forecast = ForecastItem & { dailyRate: number; leadTimeDemand: number; daysRemaining: number | null; recommended: number; status: string };
 type DemandPrediction = { itemId: string; demandLevel: "Low" | "Medium" | "High"; predictionFor: string; modelVersion: string };
 type DemandResponse = { predictions?: DemandPrediction[]; skipped?: Array<{ itemId: string; reason: unknown }>; error?: string; detail?: { message?: string } };
-type TrainingResult = { modelVersion?: string; trainingRows?: number; testRows?: number; metrics?: { accuracy: number; precision: number; recall: number; f1: number; confusionMatrix: { labels: string[]; values: number[][] } }; error?: string };
 const numberFormat = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
 
 export default function DemandPredictionPage() {
@@ -42,10 +41,8 @@ export default function DemandPredictionPage() {
   const [items, setItems] = useState<ForecastItem[]>([]);
   const [selectedInventory, setSelectedInventory] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [training, setTraining] = useState(false);
-  const [predicting, setPredicting] = useState(false);
+  const [predictionStep, setPredictionStep] = useState<"idle" | "training" | "predicting">("idle");
   const [error, setError] = useState("");
-  const [trainingResult, setTrainingResult] = useState<TrainingResult | null>(null);
   const [predictions, setPredictions] = useState<DemandPrediction[]>([]);
 
   const loadForecast = useCallback(async () => {
@@ -64,25 +61,15 @@ export default function DemandPredictionPage() {
     }
   }, []);
 
-  const trainModel = useCallback(async () => {
-    setTraining(true);
-    setError("");
-    try {
-      const response = await fetch("/api/demand/train", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) });
-      const result = await response.json() as TrainingResult;
-      if (!response.ok) throw new Error(result.error || "Could not train the demand model.");
-      setTrainingResult(result);
-    } catch (trainingError) {
-      setError(trainingError instanceof Error ? trainingError.message : "Could not train the demand model.");
-    } finally {
-      setTraining(false);
-    }
-  }, []);
-
   const generatePredictions = useCallback(async () => {
-    setPredicting(true);
+    setPredictionStep("training");
     setError("");
+    setPredictions([]);
     try {
+      const trainingResponse = await fetch("/api/demand/train", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) });
+      const trainingResult = await trainingResponse.json() as { error?: string; detail?: { message?: string } };
+      if (!trainingResponse.ok) throw new Error(trainingResult.error || trainingResult.detail?.message || "Could not train the demand model.");
+      setPredictionStep("predicting");
       const response = await fetch("/api/demand/predict-all", { cache: "no-store" });
       const result = await response.json() as DemandResponse;
       if (!response.ok) throw new Error(result.error || result.detail?.message || "Could not generate demand predictions.");
@@ -90,7 +77,7 @@ export default function DemandPredictionPage() {
     } catch (predictionError) {
       setError(predictionError instanceof Error ? predictionError.message : "Could not generate demand predictions.");
     } finally {
-      setPredicting(false);
+      setPredictionStep("idle");
     }
   }, []);
 
@@ -123,7 +110,7 @@ export default function DemandPredictionPage() {
       const aRisk = a.quantity <= a.reorderLevel ? 0 : aDays <= 30 ? 1 : a.dailyRate === 0 ? 3 : 2;
       const bRisk = b.quantity <= b.reorderLevel ? 0 : bDays <= 30 ? 1 : b.dailyRate === 0 ? 3 : 2;
       return aRisk - bRisk || aDays - bDays || a.name.localeCompare(b.name);
-    }), [items, predictions, selectedInventory]);
+    }), [items, selectedInventory]);
 
   const metrics = useMemo(() => ({
     monthlyDemand: forecasts.reduce((sum, item) => sum + item.issuedLast30Days, 0),
@@ -156,20 +143,17 @@ export default function DemandPredictionPage() {
           <div className="page-content">
             <div className={`${styles.content} prediction-content page-inner`}>
               <div className={styles.intro}>
-                <div><p className={styles.eyebrow}>XGBOOST DEMAND OUTLOOK</p><h2 className={styles.title}>Demand classification</h2><p className={styles.description}>Train a Low, Medium, and High demand classifier from recorded stock-out history and item context.</p></div>
+                <div><p className={styles.eyebrow}>XGBOOST DEMAND OUTLOOK</p><h2 className={styles.title}>Demand classification</h2><p className={styles.description}>Predict Low, Medium, or High demand from recorded stock-out history and item context.</p></div>
                 <div className={styles.toolbar}>
                   <select className={styles.select} value={selectedInventory} onChange={(event) => setSelectedInventory(event.target.value)} aria-label="Filter by inventory">
                     <option value="all">All inventories</option>
                     {inventories.map((inventory) => <option value={inventory.id} key={inventory.id}>{inventory.name}</option>)}
                   </select>
-                  <button className={styles.button} type="button" onClick={() => void trainModel()} disabled={training}><BrainCircuit size={14} />{training ? "Training…" : "Train model"}</button>
-                  <button className={styles.button} type="button" onClick={() => void generatePredictions()} disabled={predicting}><Play size={14} />{predicting ? "Predicting…" : "Predict all"}</button>
+                  <button className={styles.button} type="button" onClick={() => void generatePredictions()} disabled={predictionStep !== "idle"}><Play size={14} />{predictionStep === "training" ? "Training model…" : predictionStep === "predicting" ? "Predicting…" : "Predict all"}</button>
                 </div>
               </div>
 
               {error && <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={() => void loadForecast()}>Retry</button></div>}
-
-              {trainingResult?.metrics && <section className={styles.panel} aria-label="Demand model evaluation"><div className={styles.panelHeader}><h3 className={styles.panelTitle}>Latest model evaluation</h3><span className={styles.panelMeta}>{trainingResult.modelVersion} · {trainingResult.trainingRows} training rows · {trainingResult.testRows} test rows</span></div><div className={styles.metrics}><article className={styles.metric}><div className={styles.metricTop}><span>Accuracy</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.accuracy * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Precision</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.precision * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Recall</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.recall * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>F1 score</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.f1 * 100).toFixed(1)}%</div></article></div></section>}
 
               <div className={styles.metrics}>
                 {metricCards.map((metric) => { const Icon = metric.icon; return <article className={styles.metric} key={metric.label}><div className={styles.metricTop}><span>{metric.label}</span><span className={styles.metricIcon}><Icon size={16} /></span></div><div className={styles.metricValue}>{loading ? "—" : metric.value}</div><p className={styles.metricNote}>{metric.note}</p></article>; })}

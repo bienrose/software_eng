@@ -51,4 +51,4 @@ npm run dev
 
 Run `npm ci` once from this folder first if Node.js packages are not installed.
 
-Open [http://localhost:3000/prediction](http://localhost:3000/prediction). Select **Train model**, then **Predict all**. The service saves the trained model in `aims/demand_service/models/`. If training reports insufficient history, record more stock-out transactions before trying again.
+Open [http://localhost:3000/prediction](http://localhost:3000/prediction) and select **Predict all**. The button trains the model before generating predictions. The service saves the trained model in `aims/demand_service/models/`. If training reports insufficient history, record more stock-out transactions before trying again.
