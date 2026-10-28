@@ -58,10 +58,10 @@ const inventoryRows: {
 
 const quickActions = [
   {
-    href: "/inventory/add",
+    href: "/inventory",
     icon: Plus,
     title: "Add inventory",
-    description: "Record a new item entering the warehouse.",
+    description: "Open your inventories to add or manage stock.",
   },
   {
     href: "/inventory_creator",
