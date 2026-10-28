@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ClipboardList, ArrowRight, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, Package, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, ArrowRight, Bell, Boxes, CircleAlert, FileBarChart, Home, LogOut, Package, RefreshCw, Sparkles, Trash2, TrendingUp } from "lucide-react";
 import styles from "./collections.module.css";
 import { useCallback, useEffect, useState } from "react";
 
@@ -32,6 +32,8 @@ export default function InventoryPage() {
   const [inventories, setInventories] = useState<InventorySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadInventories = useCallback(async () => {
     setLoading(true);
@@ -52,6 +54,26 @@ export default function InventoryPage() {
     const timeout = window.setTimeout(() => { void loadInventories(); }, 0);
     return () => window.clearTimeout(timeout);
   }, [loadInventories]);
+
+  const deleteInventory = async (inventory: InventorySummary) => {
+    const itemLabel = inventory.itemCount === 1 ? "item" : "items";
+    if (!window.confirm(`Delete "${inventory.name}" and remove its ${inventory.itemCount} ${itemLabel} from active views? Stock movement history will be kept.`)) return;
+    setDeletingId(inventory.id);
+    setDeleteError("");
+    try {
+      const response = await fetch(`/api/inventories/${inventory.id}`, { method: "DELETE" });
+      if (!response.ok) {
+        const result = await response.json() as { error?: string };
+        throw new Error(result.error || "Could not delete inventory.");
+      }
+      setInventories((current) => current.filter((item) => item.id !== inventory.id));
+    } catch (deleteFailure) {
+      setDeleteError(deleteFailure instanceof Error ? deleteFailure.message : "Could not delete inventory.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const totalItems = inventories.reduce((sum, inventory) => sum + inventory.itemCount, 0);
 
   return (
@@ -76,12 +98,15 @@ export default function InventoryPage() {
               <section className={styles.grid} aria-label="Available inventories">
                 {loading && <div className={styles.stateCard}>Loading inventories from aims_db…</div>}
                 {!loading && error && <div className={`${styles.stateCard} ${styles.errorState}`} role="alert"><CircleAlert size={18} /><span>{error}</span><button type="button" onClick={() => void loadInventories()}><RefreshCw size={13} />Try again</button></div>}
-                {!loading && !error && inventories.map((inventory, index) => <Link href={`/inventory/${inventory.id}`} className={styles.card} key={inventory.id}>
-                  <div className={styles.cardTop}><span className={`${styles.cardIcon} ${styles[`tone${index % 3}`]}`}><Boxes size={19} /></span><span className={styles.openIcon}><ArrowRight size={16} /></span></div>
-                  <h3>{inventory.name}</h3><p className={styles.description}>{inventory.description || "Inventory records and adaptive item fields."}</p>
-                  <div className={styles.cardMeta}><span><Package size={13} />{inventory.itemCount} {inventory.itemCount === 1 ? "item" : "items"}</span><span>{inventory.fieldCount} adaptive {inventory.fieldCount === 1 ? "field" : "fields"}</span></div>
-                  <div className={styles.cardFooter}><span>{inventory.totalUnits.toLocaleString()} total units</span><span>Open inventory <ArrowRight size={13} /></span></div>
-                </Link>)}
+                {!loading && deleteError && <div className={`${styles.stateCard} ${styles.errorState}`} role="alert"><CircleAlert size={18} /><span>{deleteError}</span><button type="button" onClick={() => setDeleteError("")}>Dismiss</button></div>}
+                {!loading && !error && inventories.map((inventory, index) => <article className={styles.card} key={inventory.id}>
+                  <div className={styles.cardTop}><span className={`${styles.cardIcon} ${styles[`tone${index % 3}`]}`}><Boxes size={19} /></span><button type="button" className={styles.deleteButton} onClick={() => void deleteInventory(inventory)} disabled={deletingId !== null} aria-label={`Delete ${inventory.name}`}><Trash2 size={14} />{deletingId === inventory.id ? "Deleting…" : "Delete"}</button></div>
+                  <Link href={`/inventory/${inventory.id}`} className={styles.cardLink}>
+                    <h3>{inventory.name}</h3><p className={styles.description}>{inventory.description || "Inventory records and adaptive item fields."}</p>
+                    <div className={styles.cardMeta}><span><Package size={13} />{inventory.itemCount} {inventory.itemCount === 1 ? "item" : "items"}</span><span>{inventory.fieldCount} adaptive {inventory.fieldCount === 1 ? "field" : "fields"}</span></div>
+                    <div className={styles.cardFooter}><span>{inventory.totalUnits.toLocaleString()} total units</span><span>Open inventory <ArrowRight size={13} /></span></div>
+                  </Link>
+                </article>)}
               </section>
 
               {!loading && !error && inventories.length === 0 && <div className={styles.emptyCard}><Boxes size={24} /><h3>No inventories yet</h3><p>Create an inventory to see it listed here.</p><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={14} />Create your first inventory</Link></div>}

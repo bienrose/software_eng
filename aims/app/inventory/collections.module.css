@@ -12,13 +12,16 @@
 .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
 .card { display:flex; min-height:218px; flex-direction:column; padding:18px; border:1px solid var(--green-border); border-radius:11px; background:#fff; box-shadow:var(--shadow-card); color:inherit; text-decoration:none; transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease; }
 .card:hover { transform:translateY(-2px); border-color:var(--green-dark); box-shadow:0 8px 20px rgba(20,92,50,.12); }
+.cardLink { display:flex; flex:1; flex-direction:column; color:inherit; text-decoration:none; }
 .cardTop { display:flex; align-items:center; justify-content:space-between; }
-.cardIcon,.openIcon { display:flex; align-items:center; justify-content:center; }
+.cardIcon { display:flex; align-items:center; justify-content:center; }
 .cardIcon { width:42px; height:42px; border-radius:10px; }
 .tone0 { background:var(--green-light); color:var(--green-dark); }
 .tone1 { background:var(--blue-bg); color:var(--blue); }
 .tone2 { background:var(--yellow-bg); color:var(--yellow); }
-.openIcon { width:29px; height:29px; border-radius:50%; background:#f4f8f4; color:var(--green-dark); }
+.deleteButton { display:inline-flex; min-height:32px; align-items:center; gap:6px; padding:0 8px; border:1px solid var(--red-border); border-radius:6px; background:var(--red-bg); color:var(--red); font:inherit; font-size:10px; font-weight:600; cursor:pointer; }
+.deleteButton:hover:not(:disabled) { opacity:.8; }
+.deleteButton:disabled { opacity:.6; cursor:wait; }
 .card h3 { margin:16px 0 5px; color:var(--green-dark); font-size:14px; font-weight:700; }
 .description { min-height:34px; margin:0; color:var(--green-muted); font-size:10px; line-height:1.6; }
 .cardMeta { display:flex; flex-wrap:wrap; gap:11px; margin-top:13px; color:var(--green-muted); font-size:9px; }

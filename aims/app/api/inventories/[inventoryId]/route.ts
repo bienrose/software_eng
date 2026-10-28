@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { RowDataPacket } from "mysql2/promise";
+import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { databaseErrorResponse, withConnection } from "@/lib/mysql";
 import { validateSchemaValue } from "@/lib/schema-value";
 
@@ -16,6 +16,23 @@ function parseObject(value: unknown): JsonObject {
   const parsed = parseJson(value);
   if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed as JsonObject;
   return {};
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ inventoryId: string }> }) {
+  const { inventoryId } = await params;
+  try {
+    const archived = await withConnection(async (connection) => {
+      const [result] = await connection.execute<ResultSetHeader>(
+        "UPDATE inventory_categories SET archived_at = CURRENT_TIMESTAMP(3) WHERE id = ? AND archived_at IS NULL",
+        [inventoryId],
+      );
+      return result.affectedRows > 0;
+    });
+    if (!archived) return Response.json({ error: "Inventory not found." }, { status: 404 });
+    return Response.json({ id: inventoryId, archived: true });
+  } catch (error) {
+    return databaseErrorResponse(error);
+  }
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ inventoryId: string }> }) {

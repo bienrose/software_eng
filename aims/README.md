@@ -83,14 +83,14 @@ See [demand_service/README.md](demand_service/README.md) for the commands to use
 
 The relational core stores inventories as `inventory_categories` and items as `inventory_items`. Each inventory has versioned schema metadata in `inventory_schema_versions` and `inventory_schema_fields`. The schema is versioned so adaptive fields can be changed safely without mutating historical data.
 
-Stock changes are recorded in `inventory_transactions`. Database triggers update the on-hand balance and reject stock-outs that would result in a negative balance. Transactions are append-only; changes to balances are derived from movement history rather than overwritten in place.
+Stock changes are recorded in `inventory_transactions`. Database triggers update the on-hand balance and reject stock-outs that would result in a negative balance. Transactions are append-only; changes to balances are derived from movement history rather than overwritten in place. Deleting an inventory archives it so its items disappear from active views while historical records remain in MySQL.
 
 ## API overview
 
 | Endpoint | Methods | Purpose |
 | --- | --- | --- |
 | `/api/inventories` | `GET`, `POST` | List and create inventories |
-| `/api/inventories/[inventoryId]` | `GET`, `PUT` | Read or update an inventory, its fields, and items |
+| `/api/inventories/[inventoryId]` | `GET`, `PUT`, `DELETE` | Read, update, or archive an inventory, its fields, and items |
 | `/api/inventories/[inventoryId]/items` | `POST` | Add an item to an inventory |
 | `/api/inventory-items/[itemId]/movements` | `POST` | Record a stock movement |
 | `/api/reports` | `GET` | Read report data |
