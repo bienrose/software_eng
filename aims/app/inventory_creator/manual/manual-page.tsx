@@ -680,7 +680,7 @@ export default function ManualInventoryPage({ inventoryId }: { inventoryId?: str
                 <div className={styles.tableWrap}>
                   <table className={styles.sheet} onKeyDown={handleGridKeyDown} onPaste={handleGridPaste}>
                     <colgroup>
-                      {columnOrder.map((key) => <col key={key} className={key === "description" ? styles.descriptionColumn : styles.dataColumn} />)}
+                      {columnOrder.map((key) => <col key={key} className={key === "description" ? styles.descriptionColumn : key.startsWith("custom:") ? styles.customColumn : styles.dataColumn} />)}
                       <col className={styles.actionColumn} />
                     </colgroup>
                     <thead><tr>{columnOrder.map(renderColumnHeader)}

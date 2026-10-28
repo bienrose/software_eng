@@ -35,20 +35,21 @@
 .sheet { width:100%; min-width:920px; table-layout:fixed; border-collapse:collapse; text-align:left; }
 .dataColumn { width:184px; }
 .descriptionColumn { width:240px; }
+.customColumn { width:220px; }
 .actionColumn { width:56px; }
 .sheet th { height:auto; min-height:38px; padding:8px 9px; vertical-align:top; background:#f8fbf8; color:var(--green-muted); font-size:9px; font-weight:700; white-space:nowrap; }
 .sheet .headerInput { display:block; width:100%; min-width:90px; height:28px; padding:0 6px; border:1px solid transparent; border-radius:4px; outline:none; background:transparent; color:var(--green-dark); font:inherit; font-size:9px; font-weight:700; }
 .sheet .headerInput:hover { border-color:#d9e6da; background:#fff; }
 .sheet .headerInput:focus { border-color:var(--green-dark); background:#fff; }
 .columnHeader { display:grid; width:100%; min-width:0; grid-template-columns:22px minmax(0,1fr) 25px; align-items:center; gap:4px; }
-.columnHeader .headerInput { min-width:0; }
-.columnHeader .customFieldControls { grid-column:1 / -1; }
-.dragHandle { display:inline-flex; width:22px; height:26px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:#829385; cursor:grab; }
+.columnHeader .headerInput { grid-column:2; grid-row:1; min-width:0; }
+.columnHeader .customFieldControls { grid-column:1 / -1; grid-row:2; }
+.dragHandle { display:inline-flex; grid-column:1; grid-row:1; width:22px; height:26px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:#829385; cursor:grab; }
 .dragHandle:hover { background:var(--green-light); color:var(--green-dark); }
 .dragHandle:active { cursor:grabbing; }
-.removeColumnButton { display:inline-flex; width:25px; height:26px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:var(--red); cursor:pointer; }
+.removeColumnButton { display:inline-flex; grid-column:3; grid-row:1; width:25px; height:26px; align-items:center; justify-content:center; border:0; border-radius:4px; background:transparent; color:var(--red); cursor:pointer; }
 .removeColumnButton:hover { background:var(--red-bg); }
-.requiredColumnMark { color:var(--green-muted); font-size:7px; font-weight:600; text-align:center; }
+.requiredColumnMark { grid-column:2; grid-row:2; color:var(--green-muted); font-size:7px; font-weight:600; text-align:left; }
 .dragTarget { box-shadow:inset 3px 0 0 var(--green-dark); background:#eef6ee!important; }
 .customFieldControls { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
 .customFieldControls select,.choiceOptions { min-width:0; height:26px; padding:0 5px; border:1px solid var(--green-border); border-radius:4px; outline:none; background:#fff; color:var(--green-dark); font:inherit; font-size:9px; }
