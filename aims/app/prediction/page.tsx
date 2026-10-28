@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ClipboardList, AlertTriangle, Bell, Boxes, BrainCircuit, CalendarClock, FileBarChart, Home, Lightbulb, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
+import { ClipboardList, AlertTriangle, Bell, Boxes, BrainCircuit, CalendarClock, FileBarChart, Home, LogOut, PackageCheck, Play, Sparkles, TrendingUp } from "lucide-react";
 import styles from "../styles/analytics.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -167,7 +167,6 @@ export default function DemandPredictionPage() {
                 </div>
               </div>
 
-              <div className={styles.notice}><Lightbulb size={15} /><span>Demand level classifies the next 30 days of expected usage. Suggested order = max(0, reorder level + average daily usage × supplier lead time − stock on hand). The demand category does not multiply the order quantity. Check supplier pack sizes before ordering.</span></div>
               {error && <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={() => void loadForecast()}>Retry</button></div>}
 
               {trainingResult?.metrics && <section className={styles.panel} aria-label="Demand model evaluation"><div className={styles.panelHeader}><h3 className={styles.panelTitle}>Latest model evaluation</h3><span className={styles.panelMeta}>{trainingResult.modelVersion} · {trainingResult.trainingRows} training rows · {trainingResult.testRows} test rows</span></div><div className={styles.metrics}><article className={styles.metric}><div className={styles.metricTop}><span>Accuracy</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.accuracy * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Precision</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.precision * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>Recall</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.recall * 100).toFixed(1)}%</div></article><article className={styles.metric}><div className={styles.metricTop}><span>F1 score</span><BrainCircuit size={16} /></div><div className={styles.metricValue}>{(trainingResult.metrics.f1 * 100).toFixed(1)}%</div></article></div></section>}

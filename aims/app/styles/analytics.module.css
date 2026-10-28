@@ -34,8 +34,6 @@
 .state { padding:34px 18px; color:#7588a0; text-align:center; font-size:12px; }
 .error { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding:12px 14px; border:1px solid #efc6c3; border-radius:9px; background:#fff5f4; color:#a83e38; font-size:11px; }
 .error button { border:0; background:none; color:inherit; font:inherit; font-weight:700; cursor:pointer; }
-.notice { display:flex; align-items:flex-start; gap:10px; margin-bottom:16px; padding:12px 14px; border:1px solid #d7e6f7; border-radius:9px; background:#f5f9ff; color:#5e7898; font-size:11px; line-height:1.6; }
-.notice svg { flex:0 0 auto; margin-top:1px; color:#3777cf; }
 .itemCell { min-width:180px; }
 .itemSub { display:block; margin-top:3px; color:#8b9bb0; font-size:9px; }
 .number { font-variant-numeric:tabular-nums; }

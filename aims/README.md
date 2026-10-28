@@ -49,23 +49,7 @@ Open <http://localhost:3000>. Restart the server after changing `.env.local`.
 ### Start the demand prediction service
 
 The web app can run without this service, but prediction and model training endpoints need it.
-
-In a second terminal, from the repository root:
-
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r demand_service/requirements.txt
-uvicorn app:app --app-dir demand_service --reload --host 127.0.0.1 --port 8000
-```
-
-On macOS or Linux, replace the environment activation command with:
-
-```bash
-source .venv/bin/activate
-```
-
-The service reads the same MySQL settings from the root `.env.local`. It saves its trained model under `demand_service/models/`, which is ignored by Git. Check service availability at <http://127.0.0.1:8000/docs>.
+See [demand_service/README.md](demand_service/README.md) for the commands to use the AIMS virtual environment, start FastAPI, and check that it is running.
 
 ## Main areas
 
