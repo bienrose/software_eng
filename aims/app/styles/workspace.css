@@ -462,7 +462,7 @@
   color: var(--dash-ink);
 }
 
-.dashboard-theme .sidebar { background: #102b4e; box-shadow: 8px 0 28px rgba(20, 48, 84, .08); }
+.dashboard-theme .sidebar { background: #01082D; box-shadow: 8px 0 28px rgba(20, 48, 84, .08); }
 .dashboard-theme .sidebar-link:hover,
 .dashboard-theme .sidebar-link.is-active,
 .dashboard-theme .sidebar-logout:hover { background: rgba(79, 141, 255, .2); }

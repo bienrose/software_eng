@@ -659,7 +659,7 @@ export default function ManualInventoryPage({ inventoryId }: { inventoryId?: str
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = inventoryId ? item.href === "/inventory" : item.href === "/inventory_creator"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
-          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
+          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">YB</div><div className="min-w-0"><p className="sidebar-user-name">Yther Ballesteros</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
         </aside>
 
         <section className="main">

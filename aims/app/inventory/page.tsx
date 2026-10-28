@@ -62,14 +62,14 @@ export default function InventoryPage() {
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
-          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
+          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">YB</div><div className="min-w-0"><p className="sidebar-user-name">Yther Ballesteros</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
         </aside>
 
         <section className="main">
-          <header className="topbar"><div><h1 className="topbar-title">Inventory</h1><p className="topbar-subtitle">View your inventories, stock levels, and recent activity.</p></div><div className="topbar-tools"><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button><div className="topbar-profile">JD</div></div></header>
+          <header className="topbar"><div><h1 className="topbar-title">Inventory</h1><p className="topbar-subtitle">View your inventories, stock levels, and recent activity.</p></div><div className="topbar-tools"><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button><div className="topbar-profile">YB</div></div></header>
           <div className="page-content">
             <div className={`${styles.content} page-inner`}>
-              <div className={styles.intro}><div><p className={styles.eyebrow}>Inventory workspace</p><h2>Your inventories</h2><p>Open an inventory to review its items, stock levels, and recent movements.</p></div><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={15} />Create inventory</Link></div>
+              <div className={`${styles.intro} inventory-collection-heading`}><div><p className={styles.eyebrow}>Inventory workspace</p><h2>Your inventories</h2><p>Open an inventory to review its items, stock levels, and recent movements.</p></div><Link href="/inventory_creator" className={styles.createLink}><Sparkles size={15} />Create inventory</Link></div>
 
               <div className={styles.summary}><Boxes size={17} /><span><strong>{inventories.length}</strong> inventories</span><i /><Package size={17} /><span><strong>{totalItems}</strong> tracked items</span></div>
 

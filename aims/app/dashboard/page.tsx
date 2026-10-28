@@ -18,7 +18,6 @@ import {
   PackageCheck,
   AlertTriangle,
   Layers3,
-  Activity,
   ClipboardList,
   FileBarChart,
 } from "lucide-react";
@@ -85,7 +84,7 @@ const summaryStats = [
   { label: "Categories", value: "18", note: "Inventory groups", icon: Layers3, tone: "violet" },
 ];
 
-const user = { name: "John Doe", role: "Administrator", initials: "JD" };
+const user = { name: "Yther Ballesteros", role: "Administrator", initials: "YB" };
 
 export default function DashboardPage() {
   const [today, setToday] = useState<string | null>(null);
@@ -159,7 +158,7 @@ export default function DashboardPage() {
               <button className="topbar-icon-btn" title="Notifications" aria-label="Notifications">
                 <Bell size={17} strokeWidth={1.8} /><i />
               </button>
-              <div className="topbar-profile">JD</div>
+              <div className="topbar-profile">YB</div>
             </div>
           </header>
 
@@ -167,9 +166,9 @@ export default function DashboardPage() {
             <div className="page-inner dashboard-inner">
               <section className="welcome-panel">
                 <div className="welcome-copy">
-                  <span className="welcome-kicker"><Activity size={14} /> INVENTORY AT A GLANCE</span>
-                  <h2>Good to see you, {user.name.split(" ")[0]}.</h2>
-                  <p>Here’s what’s happening across your inventory today.</p>
+                  <p className="admin-eyebrow">Dashboard</p>
+                  <h2 className="admin-page-title">Inventory overview</h2>
+                  <p className="admin-page-description">Stock levels and recent inventory activity.</p>
                 </div>
               </section>
 
@@ -184,7 +183,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="dashboard-section">
-                <div className="section-heading"><div><span className="section-kicker">GET THINGS DONE</span><h2 className="section-title">Quick actions</h2></div><span className="section-hint">Shortcuts to your workspace</span></div>
+                <div className="section-heading"><div><h2 className="section-title">Quick actions</h2></div></div>
                 <div className="actions-grid">
                   {quickActions.map((action) => {
                     const Icon = action.icon;
@@ -209,7 +208,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="dashboard-section inventory-section">
-                <div className="section-heading"><div><span className="section-kicker">LATEST UPDATES</span><h2 className="section-title mb-0">Recent inventory</h2></div>
+                <div className="section-heading"><div><h2 className="section-title mb-0">Recent inventory</h2></div>
                   <Link
                     href="/inventory"
                     className="view-all-link"

@@ -148,13 +148,13 @@ export default function DemandPredictionPage() {
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = item.href === "/prediction"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
-          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
+          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">YB</div><div className="min-w-0"><p className="sidebar-user-name">Yther Ballesteros</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
         </aside>
 
         <section className="main">
-          <header className="topbar"><div><h1 className="topbar-title">Demand Prediction</h1><p className="topbar-subtitle">Plan replenishment from recent stock-out activity.</p></div><div className="topbar-tools"><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button><div className="topbar-profile">JD</div></div></header>
+          <header className="topbar"><div><h1 className="topbar-title">Demand Prediction</h1><p className="topbar-subtitle">Plan replenishment from recent stock-out activity.</p></div><div className="topbar-tools"><button className="topbar-icon-btn" type="button" title="Notifications" aria-label="Notifications"><Bell size={16} strokeWidth={1.75} /></button><div className="topbar-profile">YB</div></div></header>
           <div className="page-content">
-            <div className={`${styles.content} page-inner`}>
+            <div className={`${styles.content} prediction-content page-inner`}>
               <div className={styles.intro}>
                 <div><p className={styles.eyebrow}>XGBOOST DEMAND OUTLOOK</p><h2 className={styles.title}>Demand classification</h2><p className={styles.description}>Train a Low, Medium, and High demand classifier from recorded stock-out history and item context.</p></div>
                 <div className={styles.toolbar}>

@@ -129,7 +129,7 @@ export default function MovementForm({ kind }: { kind: MovementKind }) {
             })}
           </nav>
           <div className="sidebar-footer">
-            <div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div>
+            <div className="sidebar-user"><div className="sidebar-avatar">YB</div><div className="min-w-0"><p className="sidebar-user-name">Yther Ballesteros</p><p className="sidebar-user-role">Administrator</p></div></div>
             <button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button>
           </div>
         </aside>

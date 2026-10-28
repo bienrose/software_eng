@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
-import { ArrowRight, Boxes, ClipboardList, FileBarChart, Home, LogOut, Sparkles, TrendingUp, WandSparkles } from "lucide-react";
+import { ArrowRight, Boxes, ClipboardList, FileBarChart, Home, LogOut, Sparkles, TrendingUp } from "lucide-react";
 import styles from "./inventory-creator.module.css";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -25,17 +25,17 @@ export default function InventoryCreatorPage() {
           <nav className="sidebar-nav" aria-label="Main navigation">
             {navItems.map((item) => { const Icon = item.icon; const active = item.href === "/inventory_creator"; return <Link key={item.href} href={item.href} className={`sidebar-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}><Icon size={16} strokeWidth={1.75} />{item.label}</Link>; })}
           </nav>
-          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">JD</div><div className="min-w-0"><p className="sidebar-user-name">John Doe</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
+          <div className="sidebar-footer"><div className="sidebar-user"><div className="sidebar-avatar">YB</div><div className="min-w-0"><p className="sidebar-user-name">Yther Ballesteros</p><p className="sidebar-user-role">Administrator</p></div></div><button className="sidebar-logout" type="button"><LogOut size={14} strokeWidth={1.75} />Log out</button></div>
         </aside>
 
         <section className="main">
           <header className="topbar"><div><h1 className="topbar-title">Inventory Creator</h1><p className="topbar-subtitle">Choose how you want to set up an inventory</p></div><div className={styles.topbarBadge}><Sparkles size={14} /><span>Inventory setup</span></div></header>
           <div className="page-content">
             <div className={`${styles.content} page-inner`}>
-              <div className={styles.choiceIntro}>
-                <div className={styles.eyebrow}><WandSparkles size={15} /><span>Start with the method that suits you</span></div>
-                <h2>Create an inventory</h2>
-                <p>Build your inventory item by item, or describe what you need and preview a suggested structure.</p>
+              <div className={`${styles.choiceIntro} inventory-creator-heading`}>
+                <p className="admin-eyebrow">Inventory setup</p>
+                <h2 className="admin-page-title">Create an inventory</h2>
+                <p className="admin-page-description">Build your inventory item by item, or describe what you need and preview a suggested structure.</p>
               </div>
 
               <div className={styles.choiceGrid}>

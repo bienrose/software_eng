@@ -1,30 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f4f7fc;
-  --green-dark: #183b69;
-  --green-dark-hover: #15345b;
-  --green-light: #eaf2ff;
-  --green-muted: #71839c;
-  --green-border: #dfe8f4;
-  --green-row-hover: #f7faff;
+  --font-sans: var(--font-poppins), Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bg: var(--color-canvas);
+  --green-dark: var(--color-text);
+  --green-dark-hover: var(--color-accent-strong);
+  --green-light: var(--color-accent-subtle);
+  --green-muted: var(--color-text-muted);
+  --green-border: var(--color-border);
+  --green-row-hover: var(--color-surface-subtle);
+  --sidebar-blue: #01082D;
+  --sidebar-blue-hover: #101B48;
 
-  --yellow: #b8860b;
-  --yellow-bg: #fef6e0;
-  --yellow-border: #e8c86a;
+  --yellow: var(--color-warning);
+  --yellow-bg: var(--color-warning-subtle);
+  --yellow-border: #efd49d;
 
-  --red: #a8322c;
-  --red-bg: #fdecea;
-  --red-border: #e8a9a4;
+  --red: var(--color-danger);
+  --red-bg: var(--color-danger-subtle);
+  --red-border: #efc2bd;
 
-  --blue: #2563eb;
-  --blue-bg: #eaf2ff;
-  --blue-border: #d3e2f7;
+  --blue: var(--color-accent);
+  --blue-bg: var(--color-accent-subtle);
+  --blue-border: #cad8f0;
 
-  --shadow-card: 0 4px 12px rgba(24, 59, 105, 0.06),
-                 0 1px 3px rgba(24, 59, 105, 0.04);
-  --shadow-surface: 0 1px 3px rgba(24, 59, 105, 0.06),
-                    0 1px 2px rgba(24, 59, 105, 0.03);
+  --shadow-card: 0 4px 12px rgba(18, 59, 120, 0.07),
+                 0 1px 3px rgba(18, 59, 120, 0.04);
+  --shadow-surface: 0 1px 3px rgba(18, 59, 120, 0.07),
+                    0 1px 2px rgba(18, 59, 120, 0.03);
+}
+
+body {
+  font-family: var(--font-sans);
 }
 
 .app-shell {
@@ -60,7 +67,7 @@
   width: 230px;
   flex-shrink: 0;
   flex-direction: column;
-  background: var(--green-dark);
+  background: var(--sidebar-blue);
   box-shadow: var(--shadow-surface);
 }
 
@@ -124,12 +131,12 @@
 }
 
 .sidebar-link:hover {
-  background: var(--green-dark-hover);
+  background: var(--sidebar-blue-hover);
   color: #fff;
 }
 
 .sidebar-link.is-active {
-  background: var(--green-dark-hover);
+  background: var(--sidebar-blue-hover);
   font-weight: 600;
   color: #fff;
 }
@@ -166,7 +173,7 @@
   width: 36px;
   height: 36px;
   border-radius: 9999px;
-  background: var(--green-dark-hover);
+  background: var(--sidebar-blue-hover);
   color: #fff;
   font-size: 11px;
   font-weight: 600;
